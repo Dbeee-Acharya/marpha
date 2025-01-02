@@ -1,0 +1,58 @@
+﻿@page "/login"
+@using marpha.Models
+@using marpha.Services
+@inject IAuthenticationService authService
+@inject NavigationManager navigationManager
+
+<h3>Login</h3>
+
+<div>
+    <form>
+        <div>
+            <label>Email:</label>
+            <input type="email" @bind="loginUser.UserEmail" />
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" @bind="loginUser.UserPassword" />
+        </div>
+        <button type="button" @onclick="LoginUser">Login</button>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <p>@Message</p>
+}
+
+@code {
+    private User loginUser = new User();
+    private string Message;
+
+    private async Task LoginUser()
+    {
+        try
+        {
+            var users = await authService.GetAllUsersAsync();
+
+            // Check if the email and password match an existing user
+            var authenticatedUser = users.FirstOrDefault(u =>
+                u.UserEmail == loginUser.UserEmail &&
+                u.UserPassword == loginUser.UserPassword);
+
+            if (authenticatedUser != null)
+            {
+                Message = "Login successful!";
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                Message = "Invalid email or password. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = $"An error occurred during login: {ex.Message}";
+        }
+    }
+}

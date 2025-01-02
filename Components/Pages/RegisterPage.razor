@@ -1,0 +1,70 @@
+﻿@page "/register"
+@using marpha.Models
+@using marpha.Services
+@inject IAuthenticationService authService
+@inject NavigationManager navigationManager
+
+<h3>Add User</h3>
+
+<div>
+    <form>
+        <div>
+            <label>User ID (auto-generated):</label>
+            <input type="number" value="@newUser.UserId" disabled />
+        </div>
+        <div>
+            <label>Email:</label>
+            <input type="email" @bind="newUser.UserEmail" />
+        </div>
+        <div>
+            <label>User Name:</label>
+            <input type="text" @bind="newUser.UserName" />
+        </div>
+        <div>
+            <label>Full Name:</label>
+            <input type="text" @bind="newUser.UserFullName" />
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" @bind="newUser.UserPassword" />
+        </div>
+        <div>
+            <label>Preferred Currency:</label>
+            <input type="text" @bind="newUser.UserCurrency" />
+        </div>
+        <button type="button" @onclick="AddUser">Add User</button>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <p>@Message</p>
+}
+
+@code {
+    private User newUser = new User();
+    private string Message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        newUser.UserId = await authService.GetNextUserIdAsync();
+    }
+
+    private async Task AddUser()
+    {
+        try
+        {
+            await authService.RegisterUserAsync(newUser);
+
+            Message = "User added successfully!";
+            newUser = new User();
+
+            navigationManager.NavigateTo("/login");
+
+        }
+        catch (Exception ex)
+        {
+            Message = $"Error: {ex.Message}";
+        }
+    }
+}

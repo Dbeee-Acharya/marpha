@@ -10,6 +10,10 @@ namespace marpha.Data
 {
     public class MarphaDbContext : DbContext
     {
+        public MarphaDbContext(DbContextOptions<MarphaDbContext> option) :base(option)
+        {
+                
+        }
         public DbSet<User> Users { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Debt> Debts { get; set; }

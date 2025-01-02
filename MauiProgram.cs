@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using marpha.Services;
+using Microsoft.Extensions.Logging;
 
 namespace marpha
 {
@@ -15,6 +16,9 @@ namespace marpha
                 });
 
             builder.Services.AddMauiBlazorWebView();
+
+            //My Services 
+            builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
