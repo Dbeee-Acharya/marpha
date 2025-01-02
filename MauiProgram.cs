@@ -19,6 +19,7 @@ namespace marpha
 
             //My Services 
             builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddSingleton<ITransactionService, TransactionService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
