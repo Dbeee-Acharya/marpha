@@ -20,6 +20,7 @@ namespace marpha
             //My Services 
             builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
             builder.Services.AddSingleton<ITransactionService, TransactionService>();
+            builder.Services.AddSingleton<IDebtService, DebtService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();

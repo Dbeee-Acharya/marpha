@@ -9,7 +9,7 @@ using marpha.Data;
 
 namespace marpha.Services
 {
-    internal class DebtService
+    internal class DebtService : IDebtService
     {
         private readonly string debts_file_path = Path.Combine(AppContext.BaseDirectory, "DebtDetails.json");
         public async Task<bool> AddDebtAsync(Debt debt)

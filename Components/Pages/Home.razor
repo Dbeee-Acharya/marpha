@@ -1,7 +1,8 @@
 ﻿@page "/"
-@using marpha.Data
 @using marpha.Services
+@using marpha.Data
 @inject ITransactionService TransactionService
+@inject IDebtService DebtService
 
 <style>
     .dashboard-card {
@@ -22,25 +23,32 @@
 </style>
 
 <div class="container mt-4">
-    <h3 style="color: green;">Total Balance = Total Income - Total Expense</h3>
+    <h3 style="color: green;">Overview: Total Balance = Total Income - Total Expense - Total Debt</h3>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="dashboard-card bg-success text-white text-center">
                 <h5>Total Income</h5>
                 <h2>@totalIncome</h2>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="dashboard-card bg-danger text-white text-center">
                 <h5>Total Expense</h5>
                 <h2>@totalExpense</h2>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="dashboard-card bg-warning text-white text-center">
+                <h5>Total Debt</h5>
+                <h2>@totalDebt</h2>
+            </div>
+        </div>
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-primary" @onclick="OpenModal">Add Transaction</button>
+        <button class="btn btn-primary me-2" @onclick="OpenTransactionModal">Add Transaction</button>
+        <button class="btn btn-secondary" @onclick="OpenDebtModal">Add Debt</button>
     </div>
 
     <div>
@@ -57,9 +65,24 @@
             }
         </ul>
     </div>
+
+    <div>
+        <h4>Debts</h4>
+        <ul>
+            @foreach (var debt in debts)
+            {
+                <li>
+                    <strong>@debt.DebtName</strong>
+                    - @debt.DebtAmount
+                    - @debt.DebtDate.ToString("yyyy-MM-dd")
+                </li>
+            }
+        </ul>
+    </div>
 </div>
 
-@if (showModal)
+<!-- Transaction Modal -->
+@if (showTransactionModal)
 
 {
     <div class="modal fade show d-block" tabindex="-1" role="dialog">
@@ -67,7 +90,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Transaction</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    <button type="button" class="btn-close" @onclick="CloseTransactionModal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -77,7 +100,6 @@
                     <div class="mb-3">
                         <label>Type</label>
                         <select class="form-control" @bind="newTransaction.TransactionType">
-                            <option value="null">Test</option>
                             <option value="Income">Income</option>
                             <option value="Expense">Expense</option>
                         </select>
@@ -96,8 +118,47 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseTransactionModal">Close</button>
                     <button type="button" class="btn btn-primary" @onclick="AddTransaction">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+<!-- Debt Modal -->
+@if (showDebtModal)
+
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Debt</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDebtModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Debt Name</label>
+                        <input type="text" class="form-control" @bind="newDebt.DebtName" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Amount</label>
+                        <input type="number" class="form-control" @bind="newDebt.DebtAmount" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Date</label>
+                        <input type="date" class="form-control" @bind="newDebt.DebtDate" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Description</label>
+                        <textarea class="form-control" @bind="newDebt.DebtDescription"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDebtModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddDebt">Save</button>
                 </div>
             </div>
         </div>
@@ -107,70 +168,198 @@
 
 @code {
     private List<Transaction> transactions = new List<Transaction>();
+
+    private List<Debt> debts = new List<Debt>();
+
     private Transaction newTransaction = new Transaction();
+
+    private Debt newDebt = new Debt();
+
     private decimal totalIncome;
+
     private decimal totalExpense;
-    private bool showModal;
+
+    private decimal totalDebt;
+
+    private bool showTransactionModal;
+
+    private bool showDebtModal;
+
+
 
     protected override async Task OnInitializedAsync()
+
     {
-        await LoadTransactionsAsync();
+
+        await LoadDataAsync();
+
     }
 
-    private async Task LoadTransactionsAsync()
+
+
+    private async Task LoadDataAsync()
+
     {
+
         transactions = await TransactionService.GetAllTransactionsAsync();
+
+        debts = await DebtService.GetAllDebtsAsync();
+
         CalculateTotals();
+
     }
+
+
 
     private void CalculateTotals()
-    {
-        totalIncome = (decimal)transactions
-            .Where(t => t.TransactionType == "Income")
-            .Sum(t => t.TransactionAmount);
 
-        totalExpense = (decimal)transactions
-            .Where(t => t.TransactionType == "Expense")
-            .Sum(t => t.TransactionAmount);
+    {
+
+        totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
+
+        totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
+
+        totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
+
     }
 
-    private void OpenModal()
+
+
+    private void OpenTransactionModal()
+
     {
-        newTransaction = new Transaction
-            {
-             TransactionDate = DateTime.Now
-            };
-        showModal = true;
+
+        newTransaction = new Transaction { TransactionDate = DateTime.Now };
+
+        showTransactionModal = true;
 
     }
+
+
+
+    private void CloseTransactionModal()
+
+    {
+
+        showTransactionModal = false;
+
+    }
+
+
 
     private async Task AddTransaction()
 
     {
+
         try
+
         {
+
             newTransaction.TransactionId = await TransactionService.GetTransactionsCountAsync();
+
             var success = await TransactionService.AddTransactionAsync(newTransaction);
 
+
+
             if (success)
+
             {
+
                 transactions.Add(newTransaction);
+
                 CalculateTotals();
-                CloseModal();
+
+                CloseTransactionModal();
+
             }
+
             else
+
             {
+
                 Console.WriteLine("Failed to add transaction. Duplicate TransactionId.");
+
             }
+
         }
+
         catch (Exception ex)
+
         {
+
             Console.WriteLine($"Error adding transaction: {ex.Message}");
+
         }
+
     }
 
-    private void CloseModal()
+
+
+    private void OpenDebtModal()
+
     {
-        showModal = false;
+
+        newDebt = new Debt { DebtDate = DateTime.Now };
+
+        showDebtModal = true;
+
+    }
+
+
+
+    private void CloseDebtModal()
+
+    {
+
+        showDebtModal = false;
+
+    }
+
+
+
+    private async Task AddDebt()
+
+    {
+
+        try
+
+        {
+
+            newDebt.DebtId = await DebtService.GetDebtsCountAsync();
+
+            var success = await DebtService.AddDebtAsync(newDebt);
+
+
+
+            if (success)
+
+            {
+
+                debts.Add(newDebt);
+
+                CalculateTotals();
+
+                CloseDebtModal();
+
+            }
+
+            else
+
+            {
+
+                Console.WriteLine("Failed to add debt. Duplicate DebtId.");
+
+            }
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Console.WriteLine($"Error adding debt: {ex.Message}");
+
+        }
+
     }
 }
