@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace marpha.Services
 {
-    internal interface ITransactionService
+    public interface ITransactionService
     {
         Task<bool> AddTransactionAsync(Transaction transaction);
         Task SaveTransactionsAsync(List<Transaction> transactions);

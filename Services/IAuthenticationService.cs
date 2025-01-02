@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace marpha.Services
 {
-    internal interface IAuthenticationService
+    public interface IAuthenticationService
     {
         Task<bool> RegisterUserAsync(User user);
         Task<User?> LoginUserAsync(string userEmail, string password);
