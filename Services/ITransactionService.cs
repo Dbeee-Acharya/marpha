@@ -1,0 +1,17 @@
+﻿using marpha.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace marpha.Services
+{
+    internal interface ITransactionService
+    {
+        Task<bool> AddTransactionAsync(Transaction transaction);
+        Task SaveTransactionsAsync(List<Transaction> transactions);
+        Task<List<Transaction>> GetAllTransactionsAsync();
+        Task<int> GetTransactionsCountAsync();
+    }
+}
