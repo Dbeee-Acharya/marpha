@@ -13,5 +13,6 @@ namespace marpha.Services
         Task SaveDebtsAsync(List<Debt> debts);
         Task<List<Debt>> GetAllDebtsAsync();
         Task<int> GetDebtsCountAsync();
+        Task<int> GetTotalDebtAsync();
     }
 }

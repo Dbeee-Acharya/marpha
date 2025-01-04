@@ -54,5 +54,17 @@ namespace marpha.Services
             var debts = await GetAllDebtsAsync();
             return debts.Any() ? debts.Max(u => u.DebtId) + 1 : 1;
         }
+
+        public async Task<double> GetTotalDebtAsync()
+        {
+            var debts = await GetAllDebtsAsync();
+
+            if(!debts.Any()) return 0;
+
+            var sum = debts
+                .Sum(d => d.DebtAmount);
+
+            return sum;
+        }
     }
 }

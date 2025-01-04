@@ -13,5 +13,8 @@ namespace marpha.Services
         Task SaveTransactionsAsync(List<Transaction> transactions);
         Task<List<Transaction>> GetAllTransactionsAsync();
         Task<int> GetTransactionsCountAsync();
+        Task<List<Transaction>> GetTransactionByTypeAsync(string transactionType);
+        Task<double> GetTotalTransactionByTypeAsync(string transactionType);
+
     }
 }

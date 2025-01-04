@@ -53,5 +53,37 @@ namespace marpha.Services
             var json = JsonSerializer.Serialize(transactions);
             await File.WriteAllTextAsync(transactions_file_path, json);
         }
+        public async Task<List<Transaction>> GetTransactionByTypeAsync(string transactionType)
+        {
+            var transactions = await GetAllTransactionsAsync();
+            var filteredTransactions = new List<Transaction>();
+
+            if (transactionType == "Income")
+            {
+                filteredTransactions = transactions.Where(t => t.TransactionType == "Income").ToList();
+            }
+            else if (transactionType == "Expense")
+            {
+                filteredTransactions = transactions.Where(t => t.TransactionType == "Expense").ToList();
+            }
+            else if (transactionType == "Debt")
+            {
+                filteredTransactions = transactions.Where(t => t.TransactionType == "Debt").ToList();
+            }
+
+            return filteredTransactions;
+
+        }
+        public async Task<double> GetTotalTransactionByTypeAsync(string transactionType)
+        {
+            var transactions = await GetTransactionByTypeAsync(transactionType);
+
+            if(!transactions.Any()) return 0;
+
+            var total = transactions
+                .Sum(t => t.TransactionAmount);
+
+            return total;
+        }
     }
 }
