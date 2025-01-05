@@ -9,9 +9,9 @@ namespace marpha.Data
     public class Balance
     {
         public int BalanceId { get; set; }
-        public double TotalIncome { get; set; }
-        public double TotalExpense { get; set; }
-        public double TotalDebt { get; set; }
+        public decimal TotalIncome { get; set; }
+        public decimal TotalExpense { get; set; }
+        public decimal TotalDebt { get; set; }
 
     }
 }

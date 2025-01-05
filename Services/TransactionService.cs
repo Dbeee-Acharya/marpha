@@ -74,7 +74,7 @@ namespace marpha.Services
             return filteredTransactions;
 
         }
-        public async Task<double> GetTotalTransactionByTypeAsync(string transactionType)
+        public async Task<decimal> GetTotalTransactionByTypeAsync(string transactionType)
         {
             var transactions = await GetTransactionByTypeAsync(transactionType);
 

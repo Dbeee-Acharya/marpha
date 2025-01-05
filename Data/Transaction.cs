@@ -11,7 +11,7 @@ namespace marpha.Data
         public int TransactionId { get; set; }
         public string TransactionName { get; set; }
         public string TransactionType { get; set; }
-        public double TransactionAmount { get; set; }
+        public decimal TransactionAmount { get; set; }
         public DateTime TransactionDate { get; set; }
         public string TransactionDescription { get; set; }
 

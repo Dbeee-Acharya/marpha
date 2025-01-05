@@ -50,6 +50,48 @@
         <button class="btn btn-primary me-2" @onclick="OpenTransactionModal">Add Transaction</button>
         <button class="btn btn-secondary" @onclick="OpenDebtModal">Add Debt</button>
     </div>
+    <div>
+        <h4>Top Transactions</h4>
+        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (topIncome != null)
+                {
+                    <tr>
+                        <td>Income</td>
+                        <td>@topIncome.TransactionName</td>
+                        <td>@topIncome.TransactionAmount</td>
+                        <td>@topIncome.TransactionDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+                @if (topExpense != null)
+                {
+                    <tr>
+                        <td>Expense</td>
+                        <td>@topExpense.TransactionName</td>
+                        <td>@topExpense.TransactionAmount</td>
+                        <td>@topExpense.TransactionDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+                @if (topDebt != null)
+                {
+                    <tr>
+                        <td>Debt</td>
+                        <td>@topDebt.DebtName</td>
+                        <td>@topDebt.DebtAmount</td>
+                        <td>@topDebt.DebtDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
     <div>
         <h4>Transactions</h4>
@@ -211,10 +253,34 @@
         private string selectedFilter = "all"; 
         private List<Transaction> filteredTransactions  = new List<Transaction>();
 
+        private Transaction? topIncome;
+        private Transaction? topExpense;
+        private Debt? topDebt;
+
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
+            await FindTopTransactions();
             filteredTransactions = transactions;
+        }
+
+        private async Task FindTopTransactions()
+        {
+            var incomes = await TransactionService.GetTransactionByTypeAsync("Income");
+            var expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
+            var debts = await DebtService.GetAllDebtsAsync();
+
+            topIncome = incomes
+                .OrderByDescending(i => i.TransactionAmount)
+                .FirstOrDefault();
+
+            topExpense = expenses
+                .OrderByDescending(e => e.TransactionAmount)
+                .FirstOrDefault();
+
+            topDebt = debts
+                .OrderByDescending(d => d.DebtAmount)
+                .FirstOrDefault();
         }
 
         private async Task LoadDataAsync()
@@ -226,11 +292,7 @@
 
         private void FilterTransactionsByType(ChangeEventArgs e)
         {
-            Console.WriteLine("TESTTESTTEST");
-            Console.WriteLine(e);
             selectedFilter = e.Value?.ToString() ?? "all";
-
-            Console.WriteLine(selectedFilter);
 
             filteredTransactions = selectedFilter switch
             {
