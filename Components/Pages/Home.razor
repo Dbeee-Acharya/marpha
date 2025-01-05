@@ -23,7 +23,7 @@
 </style>
 
 <div class="container mt-4">
-    <h3 style="color: green;">Overview: Total Balance = Total Income - Total Expense - Total Debt</h3>
+    <h3 style="color: green;">Overview: Total Balance = @totalTransaction</h3>
 
     <div class="row">
         <div class="col-md-4">
@@ -53,33 +53,62 @@
 
     <div>
         <h4>Transactions</h4>
-        <ul>
-            @foreach (var transaction in transactions)
-            {
-                <li>
-                    <strong>@transaction.TransactionName</strong>
-                    - @transaction.TransactionAmount
-                    - @transaction.TransactionType
-                    - @transaction.TransactionDate.ToString("yyyy-MM-dd")
-                </li>
-            }
-        </ul>
+        <label for="transactionFilter">Filter Transactions:</label>
+        <select id="transactionFilter" @onchange="FilterTransactionsByType">
+            <option value="all">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select>
+        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Transaction Name</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in filteredTransactions)
+                {
+                    <tr>
+                        <td>@transaction.TransactionName</td>
+                        <td>@transaction.TransactionAmount</td>
+                        <td>@transaction.TransactionType</td>
+                        <td>@transaction.TransactionDescription</td>
+                        <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
-    <div>
+    <div style="margin-top: 20px;">
         <h4>Debts</h4>
-        <ul>
-            @foreach (var debt in debts)
-            {
-                <li>
-                    <strong>@debt.DebtName</strong>
-                    - @debt.DebtAmount
-                    - @debt.DebtDate.ToString("yyyy-MM-dd")
-                </li>
-            }
-        </ul>
+        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Debt Name</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var debt in debts)
+                {
+                    <tr>
+                        <td>@debt.DebtName</td>
+                        <td>@debt.DebtAmount</td>
+                        <td>@debt.DebtDescription</td>
+                        <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-</div>
+
 
 <!-- Transaction Modal -->
 @if (showTransactionModal)
@@ -100,6 +129,7 @@
                     <div class="mb-3">
                         <label>Type</label>
                         <select class="form-control" @bind="newTransaction.TransactionType">
+                            <option value="null">Test</option>
                             <option value="Income">Income</option>
                             <option value="Expense">Expense</option>
                         </select>
@@ -166,34 +196,58 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-@code {
-    private List<Transaction> transactions = new List<Transaction>();
-    private List<Debt> debts = new List<Debt>();
-    private Transaction newTransaction = new Transaction();
-    private Debt newDebt = new Debt();
-    private decimal totalIncome;
-    private decimal totalExpense;
-    private decimal totalDebt;
-    private bool showTransactionModal;
-    private bool showDebtModal;
+    @code {
+        private List<Transaction> transactions = new List<Transaction>();
+        private List<Debt> debts = new List<Debt>();
+        private Transaction newTransaction = new Transaction();
+        private Debt newDebt = new Debt();
+        private decimal totalTransaction;
+        private decimal totalIncome;
+        private decimal totalExpense;
+        private decimal totalDebt;
+        private bool showTransactionModal;
+        private bool showDebtModal;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadDataAsync();
-    }
+        private string selectedFilter = "all"; 
+        private List<Transaction> filteredTransactions  = new List<Transaction>();
 
-    private async Task LoadDataAsync()
-    {
-        transactions = await TransactionService.GetAllTransactionsAsync();
-        debts = await DebtService.GetAllDebtsAsync();
-        CalculateTotals();
-    }
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadDataAsync();
+            filteredTransactions = transactions;
+        }
 
-    private void CalculateTotals()
-    {
-        totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
-        totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
-        totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
+        private async Task LoadDataAsync()
+        {
+            transactions = await TransactionService.GetAllTransactionsAsync();
+            debts = await DebtService.GetAllDebtsAsync();
+            CalculateTotals();
+        }
+
+        private void FilterTransactionsByType(ChangeEventArgs e)
+        {
+            Console.WriteLine("TESTTESTTEST");
+            Console.WriteLine(e);
+            selectedFilter = e.Value?.ToString() ?? "all";
+
+            Console.WriteLine(selectedFilter);
+
+            filteredTransactions = selectedFilter switch
+            {
+                "income" => transactions.Where(t => t.TransactionType.Equals("Income", StringComparison.OrdinalIgnoreCase)).ToList(),
+                "expense" => transactions.Where(t => t.TransactionType.Equals("Expense", StringComparison.OrdinalIgnoreCase)).ToList(),
+                _ => transactions
+            };
+        }
+
+        private void CalculateTotals()
+        {
+            totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
+            totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
+            totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
+
+            totalTransaction = totalIncome + totalDebt - totalExpense;
+
     }
 
     private void OpenTransactionModal()
@@ -279,3 +333,5 @@
         }
     }
 }
+
+</div>
