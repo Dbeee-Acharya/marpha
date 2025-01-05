@@ -101,6 +101,13 @@
             <option value="income">Income</option>
             <option value="expense">Expense</option>
         </select>
+        <div class="date-filters">
+            <label for="fromDate">From:</label>
+            <input type="date" id="fromDate" @bind="FromDate"/>
+
+            <label for="toDate">To:</label>
+            <input type="date" id="toDate" @bind="ToDate" />
+        </div>
         <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
@@ -257,6 +264,9 @@
         private Transaction? topExpense;
         private Debt? topDebt;
 
+        private DateTime? FromDate { get; set; }
+        private DateTime? ToDate { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
@@ -300,6 +310,11 @@
                 "expense" => transactions.Where(t => t.TransactionType.Equals("Expense", StringComparison.OrdinalIgnoreCase)).ToList(),
                 _ => transactions
             };
+
+            filteredTransactions = filteredTransactions
+            .Where(t => (!FromDate.HasValue || t.TransactionDate >= FromDate.Value) &&
+            (!ToDate.HasValue || t.TransactionDate <= ToDate.Value))
+            .ToList();
         }
 
         private void CalculateTotals()
