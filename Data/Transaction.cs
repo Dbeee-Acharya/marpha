@@ -15,5 +15,7 @@ namespace marpha.Data
         public DateTime TransactionDate { get; set; }
         public string TransactionDescription { get; set; }
 
+        public string TransactionCategory { get; set; }
+
     }
 }

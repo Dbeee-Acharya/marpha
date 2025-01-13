@@ -1,0 +1,119 @@
+﻿@page "/categories"
+@using marpha.Data
+@inject marpha.Services.ICategoryService CategoryService
+
+<h3>Category Management</h3>
+
+<div class="container">
+    <div class="form-section">
+        <h4>Add New Category</h4>
+        <div>
+            <label for="categoryName">Category Name:</label>
+            <input id="categoryName" @bind="NewCategoryName" placeholder="Enter category name" />
+        </div>
+        <div>
+            <label for="categoryDescription">Description:</label>
+            <input id="categoryDescription" @bind="NewCategoryDescription" placeholder="Enter description" />
+        </div>
+        <button @onclick="AddCategory" class="btn btn-primary">Add Category</button>
+    </div>
+
+    <div class="list-section">
+        <h4>Existing Categories</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Categories.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4">No categories available.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var category in Categories)
+                    {
+                        <tr>
+                            <td>@category.CategoryId</td>
+                            <td>@category.CategoryName</td>
+                            <td>@category.CategoryDescription</td>
+                            <td>
+                                <button @onclick="() => DeleteCategory(category.CategoryId)" class="btn btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private string NewCategoryName { get; set; } = string.Empty;
+    private string NewCategoryDescription { get; set; } = string.Empty;
+    private List<Category> Categories { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        Categories = await CategoryService.GetAllCategoriesAsync();
+    }
+
+    private async Task AddCategory()
+    {
+        if (string.IsNullOrWhiteSpace(NewCategoryName))
+        {
+            Console.WriteLine("Category name is required.");
+            return;
+        }
+
+        var newCategory = new Category
+            {
+                CategoryId = Guid.NewGuid().ToString(),
+                CategoryName = NewCategoryName,
+                CategoryDescription = NewCategoryDescription
+            };
+
+        var success = await CategoryService.AddCategoryAsync(newCategory);
+        if (success)
+        {
+            Console.WriteLine("Category added successfully.");
+            NewCategoryName = string.Empty;
+            NewCategoryDescription = string.Empty;
+            await LoadCategories();
+        }
+        else
+        {
+            Console.WriteLine("Category already exists or an error occurred.");
+        }
+    }
+
+    private async Task DeleteCategory(string categoryId)
+    {
+        var categories = await CategoryService.GetAllCategoriesAsync();
+        var categoryToDelete = categories.FirstOrDefault(c => c.CategoryId == categoryId);
+
+        if (categoryToDelete != null)
+        {
+            categories.Remove(categoryToDelete);
+            await CategoryService.SaveCategoryAsync(categories);
+            Console.WriteLine("Category deleted successfully.");
+            await LoadCategories();
+        }
+        else
+        {
+            Console.WriteLine("Category not found.");
+        }
+    }
+}

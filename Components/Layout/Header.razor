@@ -1,7 +1,26 @@
-﻿<div class="w-100 vh-10">
-    header
+﻿@using marpha.Services
+@inject ITransactionService TransactionService
+
+<div class="w-100 vh-10 d-flex justify-content-between align-items-center bg-dark text-white">
+    <h4>Marpha Money Manager</h4>
+
+    <h5>Balance: @totalTransaction</h5>
 </div>
 
 @code {
+    private decimal totalTransaction;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await SetTotalTransaction();
+    }
+
+    private async Task SetTotalTransaction()
+    {
+        var income = await TransactionService.GetTotalTransactionByTypeAsync("Income");
+        var expense = await TransactionService.GetTotalTransactionByTypeAsync("Expense");
+        var debt = await TransactionService.GetTotalTransactionByTypeAsync("Debt");
+
+        totalTransaction = income - expense + debt;
+    }
 }

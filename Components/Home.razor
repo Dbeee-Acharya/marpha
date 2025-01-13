@@ -3,6 +3,7 @@
 @using marpha.Data
 @inject ITransactionService TransactionService
 @inject IDebtService DebtService
+@inject ICategoryService CategoryService
 
 <style>
     .dashboard-card {
@@ -10,6 +11,21 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         padding: 20px;
         margin-bottom: 20px;
+    }
+
+    .dashboard-card.total-income {
+        border: 1px solid #3e9c35;
+        color: #3e9c35;
+    }
+
+    .dashboard-card.total-expense {
+        border: 1px solid #950606;
+        color: #950606
+    }
+
+    .dashboard-card.total-debt {
+        border: 1px solid #ddb103;
+        color: #ddb103;
     }
 
     .modal-backdrop {
@@ -23,32 +39,134 @@
 </style>
 
 <div class="container mt-4">
-    <h3 style="color: green;">Overview: Total Balance = @totalTransaction</h3>
-
     <div class="row">
         <div class="col-md-4">
-            <div class="dashboard-card bg-success text-white text-center">
-                <h5>Total Income</h5>
-                <h2>@totalIncome</h2>
+            <div class="dashboard-card total-income text-center d-flex flex-column align-items-start justify-content-between">
+                <div class="d-flex justify-content-between w-100">
+                    <h5>Income</h5>
+                    <button class="btn btn-dark btn-sm btn-block" @onclick="OpenTransactionModal">Add Income +</button>
+                </div>
+
+                <div>
+                    <h2>@totalIncome</h2>
+                </div>
+
+                <div class="align-self-end">
+                    <a>See All ></a>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="dashboard-card bg-danger text-white text-center">
-                <h5>Total Expense</h5>
+            <div class="dashboard-card total-expense text-center d-flex flex-column align-items-start justify-content-between">
+                <div class="d-flex justify-content-between w-100">
+                    <h5>Expense</h5>
+                    <button class="btn btn-dark btn-sm btn-block" @onclick="OpenTransactionModal">Add Expense +</button>
+                </div>
+                
+                <div>
                 <h2>@totalExpense</h2>
+                </div>
+
+                <div class="align-self-end">
+                    <a>See All ></a>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="dashboard-card bg-warning text-white text-center">
-                <h5>Total Debt</h5>
-                <h2>@totalDebt</h2>
+            <div class="dashboard-card total-debt text-center d-flex flex-column align-items-start justify-content-between">
+                <div class="d-flex justify-content-between w-100">
+                    <h5>Debt</h5>
+
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-dark btn-sm" @onclick="OpenDebtModal">Add Debt +</button>
+                        <button class="btn btn-dark btn-sm">Pay Debt -</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>@totalDebt</h2>
+                </div>
+
+                <div class="align-self-end">
+                    <a>See All ></a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-primary me-2" @onclick="OpenTransactionModal">Add Transaction</button>
-        <button class="btn btn-secondary" @onclick="OpenDebtModal">Add Debt</button>
+    <div class="row">
+    <div class="col-md-4">
+        <table class="table table-bordered table-striped">
+        <thead>
+            <tr class="bg-success text-white">
+                <th>Income Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var income in incomes)
+            {
+                <tr>
+                    <td>@income.TransactionName</td>
+                    <td>@income.TransactionAmount</td>
+                    <td>@income.TransactionDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+    <!-- Table for Expense -->
+    <div class="col-md-4">
+        <table class="table table-bordered table-striped">
+        <thead>
+            <tr class="bg-danger text-white">
+                <th>Expense Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in expenses)
+            {
+                <tr>
+                    <td>@expense.TransactionName</td>
+                    <td>@expense.TransactionAmount</td>
+                    <td>@expense.TransactionDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+    <div class="col-md-4">
+        <table class="table table-bordered table-striped">
+        <thead>
+            <tr class="bg-warning text-white">
+                <th>Debt Name</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var debt in debts)
+            {
+                <tr>
+                    <td>@debt.DebtName</td>
+                    <td>@debt.DebtAmount</td>
+                    <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            Chart
+        </div>
     </div>
     <div>
         <h4>Top Transactions</h4>
@@ -87,46 +205,6 @@
                         <td>@topDebt.DebtName</td>
                         <td>@topDebt.DebtAmount</td>
                         <td>@topDebt.DebtDate.ToString("yyyy-MM-dd")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div>
-        <h4>Transactions</h4>
-        <label for="transactionFilter">Filter Transactions:</label>
-        <select id="transactionFilter" @onchange="FilterTransactionsByType">
-            <option value="all">All</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-        </select>
-        <div class="date-filters">
-            <label for="fromDate">From:</label>
-            <input type="date" id="fromDate" @bind="FromDate"/>
-
-            <label for="toDate">To:</label>
-            <input type="date" id="toDate" @bind="ToDate" />
-        </div>
-        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th>Transaction Name</th>
-                    <th>Amount</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var transaction in filteredTransactions)
-                {
-                    <tr>
-                        <td>@transaction.TransactionName</td>
-                        <td>@transaction.TransactionAmount</td>
-                        <td>@transaction.TransactionType</td>
-                        <td>@transaction.TransactionDescription</td>
-                        <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
                     </tr>
                 }
             </tbody>
@@ -178,7 +256,7 @@
                     <div class="mb-3">
                         <label>Type</label>
                         <select class="form-control" @bind="newTransaction.TransactionType">
-                            <option value="null">Test</option>
+                            <option value=""></option>
                             <option value="Income">Income</option>
                             <option value="Expense">Expense</option>
                         </select>
@@ -192,6 +270,17 @@
                         <input type="date" class="form-control" @bind="newTransaction.TransactionDate" />
                     </div>
                     <div class="mb-3">
+                        <label>Category</label>
+                        <select class="form-control" @bind="newTransaction.TransactionCategory">
+                            <option value=""></option>
+                                @foreach (var category in categories)
+                                {
+                                <option value="@category.CategoryName">@category.CategoryName</option>
+                     
+                                }
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label>Description</label>
                         <textarea class="form-control" @bind="newTransaction.TransactionDescription"></textarea>
                     </div>
@@ -199,6 +288,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseTransactionModal">Close</button>
                     <button type="button" class="btn btn-primary" @onclick="AddTransaction">Save</button>
+
+                    <div class="color-danger">@error</div>
                 </div>
             </div>
         </div>
@@ -231,6 +322,17 @@
                         <input type="date" class="form-control" @bind="newDebt.DebtDate" />
                     </div>
                     <div class="mb-3">
+                        <label>Category</label>
+                        <select class="form-control" @bind="newTransaction.TransactionCategory">
+                            <option value=""></option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.CategoryName">@category.CategoryName</option>
+
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label>Description</label>
                         <textarea class="form-control" @bind="newDebt.DebtDescription"></textarea>
                     </div>
@@ -257,8 +359,13 @@
         private bool showTransactionModal;
         private bool showDebtModal;
 
+        private List<Category> categories;
+
         private string selectedFilter = "all"; 
         private List<Transaction> filteredTransactions  = new List<Transaction>();
+
+        private List<Transaction> incomes  = new List<Transaction>();
+        private List<Transaction> expenses = new List<Transaction>();
 
         private Transaction? topIncome;
         private Transaction? topExpense;
@@ -267,10 +374,13 @@
         private DateTime? FromDate { get; set; }
         private DateTime? ToDate { get; set; }
 
+        private string error;
+
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
             await FindTopTransactions();
+            
             filteredTransactions = transactions;
         }
 
@@ -296,7 +406,12 @@
         private async Task LoadDataAsync()
         {
             transactions = await TransactionService.GetAllTransactionsAsync();
+
+            incomes = await TransactionService.GetTransactionByTypeAsync("Income");
+            expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
             debts = await DebtService.GetAllDebtsAsync();
+
+            categories = await CategoryService.GetAllCategoriesAsync();
             CalculateTotals();
         }
 
@@ -325,32 +440,34 @@
 
             totalTransaction = totalIncome + totalDebt - totalExpense;
 
-    }
+        }
 
-    private void OpenTransactionModal()
-    {
-        newTransaction = new Transaction { TransactionDate = DateTime.Now };
-        showTransactionModal = true;
-    }
-
-    private void CloseTransactionModal()
-    {
-        showTransactionModal = false;
-    }
-
-    private async Task AddTransaction()
-    {
-        try
+        private void OpenTransactionModal()
         {
-            if(newTransaction.TransactionType == "Expense")
+            newTransaction = new Transaction { TransactionDate = DateTime.Now };
+            showTransactionModal = true;
+        }
+
+        private void CloseTransactionModal()
+        {
+            error = "";
+            showTransactionModal = false;
+        }
+
+        private async Task AddTransaction()
+        {
+            try
             {
-                var totalIncome = (int)await TransactionService.GetTotalTransactionByTypeAsync("Income");
-                var totalDebt = (int)await DebtService.GetTotalDebtAsync();
-                var balance = totalIncome + totalDebt;
-                if ((int)newTransaction.TransactionAmount > balance)
+                if(newTransaction.TransactionType == "Expense")
                 {
-                    Console.WriteLine("Not Enough Balance");
-                    return;
+                    var totalIncome = (int)await TransactionService.GetTotalTransactionByTypeAsync("Income");
+                    var totalDebt = (int)await DebtService.GetTotalDebtAsync();
+                    var balance = totalIncome + totalDebt;
+                    if ((int)newTransaction.TransactionAmount > balance)
+                    {
+                        Console.WriteLine("Not Enough Balance");
+                        error = "Insufficient Balance";
+                        return;
                 } 
             } 
 
