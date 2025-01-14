@@ -15,6 +15,7 @@ namespace marpha.Services
         Task<int> GetTransactionsCountAsync();
         Task<List<Transaction>> GetTransactionByTypeAsync(string transactionType);
         Task<decimal> GetTotalTransactionByTypeAsync(string transactionType);
+        Task<bool> DeleteTransactionAsync(int transactionId);
 
     }
 }

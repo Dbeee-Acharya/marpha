@@ -14,5 +14,7 @@ namespace marpha.Services
         Task<List<Debt>> GetAllDebtsAsync();
         Task<int> GetDebtsCountAsync();
         Task<decimal> GetTotalDebtAsync();
+        Task<bool> DeleteDebtAsync(int debtId);
+        Task<bool> PayDebtAsync(Debt debt, decimal totalIncome, decimal payingAmount);
     }
 }

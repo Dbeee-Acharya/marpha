@@ -85,5 +85,29 @@ namespace marpha.Services
 
             return total;
         }
+
+        public async Task<bool> DeleteTransactionAsync(int transactionId)
+        {
+            try
+            {
+                var transactions = await GetAllTransactionsAsync();
+                var transactionToDelete = transactions.FirstOrDefault(t => t.TransactionId == transactionId);
+
+                if (transactionToDelete == null)
+                {
+                    return false;
+                }
+
+                transactions.Remove(transactionToDelete);
+
+                await SaveTransactionsAsync(transactions);
+                return true; 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TRANSACTION DELETION ERROR: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

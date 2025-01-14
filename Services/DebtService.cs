@@ -66,5 +66,51 @@ namespace marpha.Services
 
             return sum;
         }
+
+        public async Task<bool> DeleteDebtAsync(int debtId)
+        {
+            try
+            {
+                var debts = await GetAllDebtsAsync();
+                var debtToDelete = debts.FirstOrDefault(t => t.DebtId == debtId);
+
+                if (debtToDelete == null)
+                {
+                    return false;
+                }
+
+                debts.Remove(debtToDelete);
+
+                await SaveDebtsAsync(debts);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DEBT DELETION ERROR: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> PayDebtAsync(Debt debt, decimal totalIncome, decimal payingAmount)
+        {
+            var debtId = debt.DebtId;
+            var debts = await GetAllDebtsAsync();
+
+            var debtToPay = debts.FirstOrDefault(d => d.DebtId == debtId);
+
+            if (debtToPay == null)
+            {
+                return false;
+            }
+
+            if(totalIncome > payingAmount && debtToPay.DebtAmount >= payingAmount)
+            {
+                debtToPay.DebtAmount -= payingAmount;
+                await SaveDebtsAsync(debts);
+                return true;
+            }
+           
+            return false;
+        }
     }
 }

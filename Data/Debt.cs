@@ -16,5 +16,6 @@ namespace marpha.Data
         public DateTime DebtDate { get; set; }
         public DateTime DebtDueDate { get; set; }
         public string DebtStatus { get; set; }
+        public string DebtSource { get; set; }
     }
 }

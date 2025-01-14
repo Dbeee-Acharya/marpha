@@ -1,0 +1,226 @@
+﻿@page "/details/{type}"
+@using marpha.Services
+@using marpha.Data
+@inject NavigationManager NavigationManager
+@inject IDebtService DebtService
+@inject ITransactionService TransactionService
+
+<h3>@pageTitle</h3>
+
+<div>
+    @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @if (type == "IncomeDetails")
+        {
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Transaction Name</th>
+                        <th>Transaction Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (details != null)
+                    {
+                        int index = 1;
+                        foreach (var transaction in details)
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@transaction.TransactionName</td>
+                                <td>@transaction.TransactionType</td>
+                                <td>@transaction.TransactionAmount</td>
+                                <td>@transaction.TransactionDate.ToShortDateString()</td>
+                                <td>@transaction.TransactionCategory</td>
+                                <td>@transaction.TransactionDescription</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteTransaction(transaction)">Delete</button>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">No transactions available</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        } else if (type == "ExpenseDetails")
+        {
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Transaction Name</th>
+                        <th>Transaction Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (details != null)
+                    {
+                        int index = 1;
+                        foreach (var transaction in details)
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@transaction.TransactionName</td>
+                                <td>@transaction.TransactionType</td>
+                                <td>@transaction.TransactionAmount</td>
+                                <td>@transaction.TransactionDate.ToShortDateString()</td>
+                                <td>@transaction.TransactionCategory</td>
+                                <td>@transaction.TransactionDescription</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteTransaction(transaction)">Delete</button>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">No transactions available</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (type == "DebtDetails")
+        {
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Debt Name</th>
+                        <th>Description</th>
+                        <th>Principal Amount</th>
+                        <th>Total Debt Amount</th>
+                        <th>Debt Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Source</th>
+                        <th>Pay</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (debtDetails != null)
+                    {
+                        @foreach (var debt in debtDetails)
+                        {
+                            <tr>
+                                <td>@debt.DebtName</td>
+                                <td>@debt.DebtDescription</td>
+                                <td>@debt.PrincipleAmount</td>
+                                <td>@debt.DebtAmount</td>
+                                <td>@debt.DebtDate.ToShortDateString()</td>
+                                <td>@debt.DebtDueDate.ToShortDateString()</td>
+                                <td>@debt.DebtStatus</td>
+                                <td>@debt.DebtSource</td>
+                                <td class="d-flex gap-3">
+                                    <input placeholder="Debt Amount to pay..." @bind="debtPayingAmount" />
+                                    <button class="btn btn-secondary btn-sm" @onclick="() => PayDebt(debt)">Pay</button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteDebt(debt)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center">No debts found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string type { get; set; }
+
+    private string pageTitle;
+    private bool isLoading = true;
+    private List<Transaction> details = new List<Transaction>();
+    private List<Debt> debtDetails = new List<Debt>();
+
+    private decimal debtPayingAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDetailsAsync();
+    }
+
+    private async Task LoadDetailsAsync()
+    {
+
+        if (type == "IncomeDetails")
+        {
+            pageTitle = "Income Details";
+            details = await TransactionService.GetTransactionByTypeAsync("Income");
+        }
+        else if (type == "DebtDetails")
+        {
+            pageTitle = "Debt Details";
+            debtDetails = await DebtService.GetAllDebtsAsync();
+        }
+        else if (type == "ExpenseDetails")
+        {
+            pageTitle = "Expense Details";
+            details = await TransactionService.GetTransactionByTypeAsync("Expense");
+        }
+        else
+        {
+            details = null;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task DeleteTransaction(Transaction transaction)
+    {
+        bool deleted = await TransactionService.DeleteTransactionAsync(transaction.TransactionId);
+        await LoadDetailsAsync();
+
+    }
+
+    private async Task DeleteDebt(Debt debt)
+    {
+        bool deleted = await DebtService.DeleteDebtAsync(debt.DebtId);
+        await LoadDetailsAsync();
+    }
+
+    private async Task PayDebt(Debt debt)
+    {
+        var totalIncome = await TransactionService.GetTotalTransactionByTypeAsync("Income");
+
+        await DebtService.PayDebtAsync(debt, totalIncome, debtPayingAmount);
+
+        debtPayingAmount = 0;
+        await LoadDetailsAsync();
+    }
+}
