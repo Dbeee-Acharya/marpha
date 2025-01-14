@@ -172,45 +172,93 @@
     </div>
     <div>
         <h4>Top Transactions</h4>
-        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (topIncome != null)
-                {
-                    <tr>
-                        <td>Income</td>
-                        <td>@topIncome.TransactionName</td>
-                        <td>@topIncome.TransactionAmount</td>
-                        <td>@topIncome.TransactionDate.ToString("yyyy-MM-dd")</td>
-                    </tr>
-                }
-                @if (topExpense != null)
-                {
-                    <tr>
-                        <td>Expense</td>
-                        <td>@topExpense.TransactionName</td>
-                        <td>@topExpense.TransactionAmount</td>
-                        <td>@topExpense.TransactionDate.ToString("yyyy-MM-dd")</td>
-                    </tr>
-                }
-                @if (topDebt != null)
-                {
-                    <tr>
-                        <td>Debt</td>
-                        <td>@topDebt.DebtName</td>
-                        <td>@topDebt.DebtAmount</td>
-                        <td>@topDebt.DebtDate.ToString("yyyy-MM-dd")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="container mt-5">
+    <div class="row">
+        @* Top Income Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Top Income
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@topIncome.TransactionName</h4>
+                    <h5 class="card-title">@topIncome.TransactionAmount</h5>
+                    <p class="card-text">Highest income recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+
+        @* Top Expense Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    Top Expense
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@topExpense.TransactionName</h4>
+                    <h5 class="card-title">@topExpense.TransactionAmount</h5>
+                    <p class="card-text">Highest expense recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+
+        @* Top Debt Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Top Debt
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@topDebt.DebtName</h4>
+                    <h5 class="card-title">@topDebt.DebtAmount</h5>
+                    <p class="card-text">Highest debt recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+
+        @* Lowest Income Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    Lowest Income
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@bottomIncome.TransactionName</h4>
+                    <h5 class="card-title">@bottomIncome.TransactionAmount</h5>
+                    <p class="card-text">Lowest income recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+
+        @* Lowest Expense Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    Lowest Expense
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@bottomExpense.TransactionName</h4>
+                    <h5 class="card-title">@bottomExpense.TransactionAmount</h5>
+                    <p class="card-text">Lowest expense recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+
+        @* Lowest Debt Card *@
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    Lowest Debt
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@bottomDebt.DebtName</h4>
+                    <h5 class="card-title">@bottomDebt.DebtAmount</h5>
+                    <p class="card-text">Lowest debt recorded in the period.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 
     <div style="margin-top: 20px;">
@@ -348,143 +396,159 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-@code {
-    private List<Transaction> transactions = new List<Transaction>();
-    private List<Debt> debts = new List<Debt>();
-    private Transaction newTransaction = new Transaction();
-    private Debt newDebt = new Debt();
-    private decimal totalTransaction;
-    private decimal totalIncome;
-    private decimal totalExpense;
-    private decimal totalDebt;
-    private bool showTransactionModal;
-    private bool showDebtModal;
+    @code {
+        private List<Transaction> transactions = new List<Transaction>();
+        private List<Debt> debts = new List<Debt>();
+        private Transaction newTransaction = new Transaction();
+        private Debt newDebt = new Debt();
+        private decimal totalTransaction;
+        private decimal totalIncome;
+        private decimal totalExpense;
+        private decimal totalDebt;
+        private bool showTransactionModal;
+        private bool showDebtModal;
 
-    private List<Category> categories;
+        private List<Category> categories;
 
-    private string selectedFilter = "all"; 
-    private List<Transaction> filteredTransactions  = new List<Transaction>();
+        private string selectedFilter = "all"; 
+        private List<Transaction> filteredTransactions  = new List<Transaction>();
 
-    private List<Transaction> incomes  = new List<Transaction>();
-    private List<Transaction> expenses = new List<Transaction>();
+        private List<Transaction> incomes  = new List<Transaction>();
+        private List<Transaction> expenses = new List<Transaction>();
 
-    private Transaction? topIncome;
-    private Transaction? topExpense;
-    private Debt? topDebt;
+        private Transaction? topIncome;
+        private Transaction? topExpense;
+        private Debt? topDebt;
 
-    private DateTime? FromDate { get; set; }
-    private DateTime? ToDate { get; set; }
+        private Transaction? bottomIncome;
+        private Transaction? bottomExpense;
+        private Debt? bottomDebt;
 
-    private string error;
+        private DateTime? FromDate { get; set; }
+        private DateTime? ToDate { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadDataAsync();
-        await FindTopTransactions();
-            
-        filteredTransactions = transactions;
-    }
+        private string error;
 
-    private async Task FindTopTransactions()
-    {
-        var incomes = await TransactionService.GetTransactionByTypeAsync("Income");
-        var expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
-        var debts = await DebtService.GetAllDebtsAsync();
-
-        topIncome = incomes
-            .OrderByDescending(i => i.TransactionAmount)
-            .FirstOrDefault();
-
-        topExpense = expenses
-            .OrderByDescending(e => e.TransactionAmount)
-            .FirstOrDefault();
-
-        topDebt = debts
-            .OrderByDescending(d => d.DebtAmount)
-            .FirstOrDefault();
-    }
-
-    private async Task LoadDataAsync()
-    {
-        transactions = await TransactionService.GetAllTransactionsAsync();
-
-        incomes = await TransactionService.GetTransactionByTypeAsync("Income");
-        expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
-        debts = await DebtService.GetAllDebtsAsync();
-
-        categories = await CategoryService.GetAllCategoriesAsync();
-        CalculateTotals();
-    }
-
-    private void FilterTransactionsByType(ChangeEventArgs e)
-    {
-        selectedFilter = e.Value?.ToString() ?? "all";
-
-        filteredTransactions = selectedFilter switch
+        protected override async Task OnInitializedAsync()
         {
-            "income" => transactions.Where(t => t.TransactionType.Equals("Income", StringComparison.OrdinalIgnoreCase)).ToList(),
-            "expense" => transactions.Where(t => t.TransactionType.Equals("Expense", StringComparison.OrdinalIgnoreCase)).ToList(),
-            _ => transactions
-        };
+            await LoadDataAsync();
+            await FindTopTransactions();
 
-        filteredTransactions = filteredTransactions
-        .Where(t => (!FromDate.HasValue || t.TransactionDate >= FromDate.Value) &&
-        (!ToDate.HasValue || t.TransactionDate <= ToDate.Value))
-        .ToList();
-    }
+            filteredTransactions = transactions;
+        }
 
-    private void CalculateTotals()
-    {
-        totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
-        totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
-        totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
-
-        totalTransaction = totalIncome + totalDebt - totalExpense;
-
-    }
-
-    private void OpenTransactionModal()
-    {
-        newTransaction = new Transaction { TransactionDate = DateTime.Now };
-        showTransactionModal = true;
-    }
-
-    private void CloseTransactionModal()
-    {
-        error = "";
-        showTransactionModal = false;
-    }
-
-    private async Task AddTransaction()
-    {
-        try
+        private async Task FindTopTransactions()
         {
-            if(newTransaction.TransactionType == "Expense")
-            {
-                var totalIncome = (int)await TransactionService.GetTotalTransactionByTypeAsync("Income");
-                var totalDebt = (int)await DebtService.GetTotalDebtAsync();
-                var balance = totalIncome + totalDebt;
-                if ((int)newTransaction.TransactionAmount > balance)
-                {
-                    Console.WriteLine("Not Enough Balance");
-                    error = "Insufficient Balance";
-                    return;
-            } 
-        } 
+            var incomes = await TransactionService.GetTransactionByTypeAsync("Income");
+            var expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
+            var debts = await DebtService.GetAllDebtsAsync();
 
-        newTransaction.TransactionId = await TransactionService.GetTransactionsCountAsync();
-        var success = await TransactionService.AddTransactionAsync(newTransaction);
-        if (success)
+            topIncome = incomes
+                .OrderByDescending(i => i.TransactionAmount)
+                .FirstOrDefault();
+
+            topExpense = expenses
+                .OrderByDescending(e => e.TransactionAmount)
+                .FirstOrDefault();
+
+            topDebt = debts
+                .OrderByDescending(d => d.DebtAmount)
+                .FirstOrDefault();
+
+            bottomIncome = incomes
+                .OrderByDescending(i => i.TransactionAmount)
+                .LastOrDefault();
+
+            bottomExpense = expenses
+                .OrderByDescending(i => i.TransactionAmount)
+                .LastOrDefault();
+
+            bottomDebt = debts
+                .OrderByDescending(d => d.DebtAmount)
+                .LastOrDefault();
+        }
+
+        private async Task LoadDataAsync()
         {
-            transactions.Add(newTransaction);
+            transactions = await TransactionService.GetAllTransactionsAsync();
+
+            incomes = await TransactionService.GetTransactionByTypeAsync("Income");
+            expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
+            debts = await DebtService.GetAllDebtsAsync();
+
+            categories = await CategoryService.GetAllCategoriesAsync();
             CalculateTotals();
-            CloseTransactionModal();
-        }
-        else
-        {
-            Console.WriteLine("Failed to add transaction. Duplicate TransactionId.");
         }
 
+        private void FilterTransactionsByType(ChangeEventArgs e)
+        {
+            selectedFilter = e.Value?.ToString() ?? "all";
+
+            filteredTransactions = selectedFilter switch
+            {
+                "income" => transactions.Where(t => t.TransactionType.Equals("Income", StringComparison.OrdinalIgnoreCase)).ToList(),
+                "expense" => transactions.Where(t => t.TransactionType.Equals("Expense", StringComparison.OrdinalIgnoreCase)).ToList(),
+                _ => transactions
+            };
+
+            filteredTransactions = filteredTransactions
+            .Where(t => (!FromDate.HasValue || t.TransactionDate >= FromDate.Value) &&
+            (!ToDate.HasValue || t.TransactionDate <= ToDate.Value))
+            .ToList();
+        }
+
+        private void CalculateTotals()
+        {
+            totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
+            totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
+            totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
+
+            totalTransaction = totalIncome + totalDebt - totalExpense;
+
+        }
+
+        private void OpenTransactionModal()
+        {
+            newTransaction = new Transaction { TransactionDate = DateTime.Now };
+            showTransactionModal = true;
+        }
+
+        private void CloseTransactionModal()
+        {
+            error = "";
+            showTransactionModal = false;
+        }
+
+        private async Task AddTransaction()
+        {
+            try
+            {
+                if(newTransaction.TransactionType == "Expense")
+                {
+                    var totalIncome = (int)await TransactionService.GetTotalTransactionByTypeAsync("Income");
+                    var totalDebt = (int)await DebtService.GetTotalDebtAsync();
+                    var balance = totalIncome + totalDebt;
+                    if ((int)newTransaction.TransactionAmount > balance)
+                    {
+                        Console.WriteLine("Not Enough Balance");
+                        error = "Insufficient Balance";
+                        return;
+                    } 
+                } 
+
+                newTransaction.TransactionId = await TransactionService.GetTransactionsCountAsync();
+                var success = await TransactionService.AddTransactionAsync(newTransaction);
+                if (success)
+                {
+                    transactions.Add(newTransaction);
+                    await LoadDataAsync();
+                    CalculateTotals();
+                    CloseTransactionModal();
+                }
+                else
+                {
+                    Console.WriteLine("Failed to add transaction. Duplicate TransactionId.");
+                }
     }
     catch (Exception ex)
     {

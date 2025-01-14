@@ -103,9 +103,10 @@ namespace marpha.Services
                 return false;
             }
 
-            if(totalIncome > payingAmount && debtToPay.DebtAmount >= payingAmount)
+            if(totalIncome > payingAmount && debtToPay.DebtAmount >= payingAmount && payingAmount !=0)
             {
                 debtToPay.DebtAmount -= payingAmount;
+                debtToPay.PaidAmount = payingAmount;
                 await SaveDebtsAsync(debts);
                 return true;
             }

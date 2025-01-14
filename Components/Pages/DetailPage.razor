@@ -111,7 +111,7 @@
                     <tr>
                         <th>Debt Name</th>
                         <th>Description</th>
-                        <th>Principal Amount</th>
+                        <th>Paid Amount</th>
                         <th>Total Debt Amount</th>
                         <th>Debt Date</th>
                         <th>Due Date</th>
@@ -129,11 +129,15 @@
                             <tr>
                                 <td>@debt.DebtName</td>
                                 <td>@debt.DebtDescription</td>
-                                <td>@debt.PrincipleAmount</td>
+                                <td>@debt.PaidAmount</td>
                                 <td>@debt.DebtAmount</td>
                                 <td>@debt.DebtDate.ToShortDateString()</td>
                                 <td>@debt.DebtDueDate.ToShortDateString()</td>
-                                <td>@debt.DebtStatus</td>
+                                <td>
+                                    <button class="btn btn-sm @((debt.DebtAmount > debt.PaidAmount) ? "btn-warning" : "btn-success")" disabled>
+                                        @(debt.DebtAmount > debt.PaidAmount ? "Due" : "Paid")
+                                    </button>
+                                </td>
                                 <td>@debt.DebtSource</td>
                                 <td class="d-flex gap-3">
                                     <input placeholder="Debt Amount to pay..." @bind="debtPayingAmount" />
