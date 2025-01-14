@@ -479,38 +479,33 @@
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
-            await FindTopTransactions();
-
-
+            
         }
 
         private async Task FindTopTransactions()
         {
-            var incomes = await TransactionService.GetTransactionByTypeAsync("Income");
-            var expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
-            var debts = await DebtService.GetAllDebtsAsync();
-
-            topIncome = incomes
+        
+            topIncome = FilteredIncomes
                 .OrderByDescending(i => i.TransactionAmount)
                 .FirstOrDefault();
 
-            topExpense = expenses
+            topExpense = FilteredExpenses
                 .OrderByDescending(e => e.TransactionAmount)
                 .FirstOrDefault();
 
-            topDebt = debts
+            topDebt = FilteredDebts
                 .OrderByDescending(d => d.DebtAmount)
                 .FirstOrDefault();
 
-            bottomIncome = incomes
+            bottomIncome = FilteredIncomes
                 .OrderByDescending(i => i.TransactionAmount)
                 .LastOrDefault();
 
-            bottomExpense = expenses
+            bottomExpense = FilteredExpenses
                 .OrderByDescending(i => i.TransactionAmount)
                 .LastOrDefault();
 
-            bottomDebt = debts
+            bottomDebt = FilteredDebts
                 .OrderByDescending(d => d.DebtAmount)
                 .LastOrDefault();
         }
@@ -533,6 +528,8 @@
             FilteredIncomes = incomes;
             FilteredExpenses = expenses;
             FilteredDebts = debts;
+
+            await FindTopTransactions();
         }
 
         private void CalculateTotals()
