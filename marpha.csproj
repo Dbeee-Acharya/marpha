@@ -58,6 +58,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Services\Interface1.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="ChartJs.Blazor.Fork" Version="2.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">

@@ -5,6 +5,7 @@
 @inject IDebtService DebtService
 @inject ITransactionService TransactionService
 @inject IFilterService FilterService
+@inject IDebtFilterService DebtFilterService
 
 <h3>@pageTitle</h3>
 
@@ -31,8 +32,15 @@
 
         <!-- Category Filter -->
         <div class="col-md-3">
+            @if (type != "DebtDetails") 
+            {
             <label for="categoryFilter">Category</label>
-            <input type="text" id="categoryFilter" class="form-control" placeholder="Search by category" @bind="CategoryFilter" />
+                <input type="text" id="categoryFilter" class="form-control" placeholder="Search by category" @bind="CategoryFilter" />
+            } else
+            {
+                <label for="debtSource">Debt Source</label>
+                <input type="text" id="debtSource" class="form-control" placeholder="Search by debtSource" @bind="DebtSource" />
+            }
         </div>
     </div>
 
@@ -175,7 +183,7 @@
                 <tbody>
                     @if (debtDetails != null)
                     {
-                        @foreach (var debt in debtDetails)
+                        @foreach (var debt in FilteredDebts)
                         {
                             <tr>
                                 <td>@debt.DebtName</td>
@@ -224,6 +232,7 @@
     private DateTime? EndDate { get; set; }
     private string NameFilter = string.Empty;
     private string CategoryFilter = string.Empty;
+    private string DebtSource = string.Empty;
     private String SortByDateAscending = "true";
     private String SortByAmountAscending = "true";
 
@@ -317,7 +326,36 @@
                 filtered = FilterService.SortByDate(filtered, false);
             }
             FilteredTransactions = filtered;
-        }          
+        }   
+        else 
+        {
+            var filtered = debtDetails;
+            if (StartDate.HasValue && EndDate.HasValue)
+            {
+                filtered = DebtFilterService.FilterByDate(filtered, StartDate.Value, EndDate.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(NameFilter))
+            {
+                filtered = DebtFilterService.FilterByName(filtered, NameFilter);
+            }
+
+            if (!string.IsNullOrWhiteSpace(CategoryFilter))
+            {
+                filtered = DebtFilterService.FilterByCategory(filtered, CategoryFilter);
+            }
+
+            if (SortByAmountAscending != "true")
+            {
+                filtered = DebtFilterService.SortByAmount(filtered, false);
+            }
+
+            if (SortByDateAscending != "true")
+            {
+                filtered = DebtFilterService.SortByDate(filtered, false);
+            }
+            FilteredDebts = filtered;
+        }
     }
 
     private async Task ClearFilters()
@@ -330,6 +368,6 @@
         CategoryFilter = string.Empty;
         SortByDateAscending = "true";
         SortByAmountAscending = "true";
-       
+        DebtSource = string.Empty;       
     }
 }

@@ -23,6 +23,7 @@ namespace marpha
             builder.Services.AddSingleton<IDebtService, DebtService>();
             builder.Services.AddSingleton<ICategoryService, CategoryService>();
             builder.Services.AddSingleton<IFilterService, FilterService>();
+            builder.Services.AddSingleton<IDebtFilterService, DebtFilterService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
