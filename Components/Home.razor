@@ -2,6 +2,7 @@
 @using marpha.Services
 @using marpha.Data
 @using marpha.Components
+@using marpha.Components.Modals
 @inject ITransactionService TransactionService
 @inject IDebtService DebtService
 @inject ICategoryService CategoryService
@@ -43,18 +44,22 @@
 </style>
 
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-3">
-            <label for="startDate">Start Date</label>
-            <input type="date" id="startDate" class="form-control" @bind="StartDate" />
-        </div>
-        <div class="col-md-3">
-            <label for="endDate">End Date</label>
-            <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+    <div class="d-flex align-items-end justify-content-between mb-3">
+        <div class="d-flex gap-3">
+            <div>
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" class="form-control" @bind="StartDate" />
+            </div>
+            <div>
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+            </div>
         </div>
 
-        <button class="btn btn-primary mb-3" @onclick="ApplyFilters">Apply Filters</button>
-        <button class="btn btn-secondary mb-3" @onclick="ClearFilters">Clear Filters</button>
+        <div>
+            <button class="btn btn-primary" @onclick="ApplyFilters">Apply Filters</button>
+            <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-4">
@@ -124,7 +129,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var income in FilteredIncomes)
+            @foreach (var income in FilteredIncomes.Take(5))
             {
                 <tr>
                     <td>@income.TransactionName</td>
@@ -147,7 +152,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var expense in FilteredExpenses)
+                    @foreach (var expense in FilteredExpenses.Take(5))
             {
                 <tr>
                     <td>@expense.TransactionName</td>
@@ -169,7 +174,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var debt in FilteredDebts)
+                    @foreach (var debt in FilteredDebts.Take(5))
             {
                 <tr>
                     <td>@debt.DebtName</td>
@@ -180,6 +185,10 @@
         </tbody>
     </table>
     </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center w-100">
+        <PieChart Slice1="@Slice1" Slice2="@Slice2" Slice3="@Slice3" />
     </div>
     
     <div>
@@ -476,6 +485,10 @@
         private DateTime? StartDate { get; set; }
         private DateTime? EndDate { get; set; }
 
+        private int Slice1 { get; set; } 
+        private int Slice2 { get; set; } 
+        private int Slice3 { get; set; } 
+
         private string error;
 
         private decimal debtPayingAmount;
@@ -483,12 +496,12 @@
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
-            
+
         }
 
         private async Task FindTopTransactions()
         {
-        
+
             topIncome = FilteredIncomes
                 .OrderByDescending(i => i.TransactionAmount)
                 .FirstOrDefault();
@@ -544,6 +557,24 @@
             totalDebt = (decimal)FilteredDebts.Sum(d => d.DebtAmount);
 
             totalTransaction = totalIncome + totalDebt - totalExpense;
+
+            var incomePercentage = (totalIncome / totalTransaction) * 100;
+            var expensePercentage = (totalExpense / totalTransaction) * 100;
+            var debtPercentage = (totalDebt / totalTransaction) * 100;
+
+            var total = incomePercentage + expensePercentage + debtPercentage;
+
+            if (total > 100)
+            {
+                var factor = 100 / total;
+                incomePercentage *= factor;
+                expensePercentage *= factor;
+                debtPercentage *= factor;
+            }
+
+            Slice1 = Convert.ToInt32(incomePercentage);
+            Slice2 = Convert.ToInt32(expensePercentage);
+            Slice3 = Convert.ToInt32(debtPercentage);
 
         }
 

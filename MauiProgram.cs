@@ -1,5 +1,7 @@
 ﻿using marpha.Services;
 using Microsoft.Extensions.Logging;
+using LiveChartsCore.SkiaSharpView.Maui;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace marpha
 {

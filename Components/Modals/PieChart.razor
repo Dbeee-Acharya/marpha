@@ -1,0 +1,18 @@
+﻿<div class="pie-chart" style="--slice1:@Slice1%; --slice2:@Slice2%; --slice3:@Slice3%;"></div>
+
+<style>
+    .pie-chart {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: conic-gradient( #4CAF50 0% var(--slice1), #FF6384 var(--slice1) calc(var(--slice1) + var(--slice2)), #FFCE56 calc(var(--slice1) + var(--slice2)) 100% );
+    }
+</style>
+
+@code {
+    [Parameter] public int Slice1 { get; set; }
+    [Parameter] public int Slice2 { get; set; }
+    [Parameter] public int Slice3 { get; set; }
+}
+
