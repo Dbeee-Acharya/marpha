@@ -6,6 +6,8 @@
 @inject IDebtService DebtService
 @inject ICategoryService CategoryService
 @inject NavigationManager NavigationManager
+@inject IFilterService FilterService
+@inject IDebtFilterService DebtFilterService
 
 <style>
     .dashboard-card {
@@ -41,6 +43,19 @@
 </style>
 
 <div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" class="form-control" @bind="StartDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+        </div>
+
+        <button class="btn btn-primary mb-3" @onclick="ApplyFilters">Apply Filters</button>
+        <button class="btn btn-secondary mb-3" @onclick="ClearFilters">Clear Filters</button>
+    </div>
     <div class="row">
         <div class="col-md-4">
             <div class="dashboard-card total-income text-center d-flex flex-column align-items-start justify-content-between">
@@ -109,7 +124,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var income in incomes)
+            @foreach (var income in FilteredIncomes)
             {
                 <tr>
                     <td>@income.TransactionName</td>
@@ -132,7 +147,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var expense in expenses)
+            @foreach (var expense in FilteredExpenses)
             {
                 <tr>
                     <td>@expense.TransactionName</td>
@@ -154,7 +169,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var debt in debts)
+            @foreach (var debt in FilteredDebts)
             {
                 <tr>
                     <td>@debt.DebtName</td>
@@ -289,7 +304,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var debt in debts)
+                @foreach (var debt in FilteredDebts)
                 {
                     if(debt.DebtAmount != 0)
                     {
@@ -391,7 +406,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Date</label>
-                        <input type="date" class="form-control" @bind="newDebt.DebtDate" />
+                        <input type="date" class="form-control" @bind="newDebt.DebtDueDate" />
                     </div>
                     <div class="mb-3">
                         <label>Category</label>
@@ -440,9 +455,6 @@
 
         private List<Category> categories;
 
-        private string selectedFilter = "all"; 
-        private List<Transaction> filteredTransactions  = new List<Transaction>();
-
         private List<Transaction> incomes  = new List<Transaction>();
         private List<Transaction> expenses = new List<Transaction>();
 
@@ -454,8 +466,11 @@
         private Transaction bottomExpense;
         private Debt bottomDebt;
 
-        private DateTime? FromDate { get; set; }
-        private DateTime? ToDate { get; set; }
+        private List<Transaction> FilteredIncomes = new();
+        private List<Transaction> FilteredExpenses = new();
+        private List<Debt> FilteredDebts = new();
+        private DateTime? StartDate { get; set; }
+        private DateTime? EndDate { get; set; }
 
         private string error;
 
@@ -466,7 +481,7 @@
             await LoadDataAsync();
             await FindTopTransactions();
 
-            filteredTransactions = transactions;
+
         }
 
         private async Task FindTopTransactions()
@@ -514,23 +529,10 @@
 
             categories = await CategoryService.GetAllCategoriesAsync();
             CalculateTotals();
-        }
 
-        private void FilterTransactionsByType(ChangeEventArgs e)
-        {
-            selectedFilter = e.Value?.ToString() ?? "all";
-
-            filteredTransactions = selectedFilter switch
-            {
-                "income" => transactions.Where(t => t.TransactionType.Equals("Income", StringComparison.OrdinalIgnoreCase)).ToList(),
-                "expense" => transactions.Where(t => t.TransactionType.Equals("Expense", StringComparison.OrdinalIgnoreCase)).ToList(),
-                _ => transactions
-            };
-
-            filteredTransactions = filteredTransactions
-            .Where(t => (!FromDate.HasValue || t.TransactionDate >= FromDate.Value) &&
-            (!ToDate.HasValue || t.TransactionDate <= ToDate.Value))
-            .ToList();
+            FilteredIncomes = incomes;
+            FilteredExpenses = expenses;
+            FilteredDebts = debts;
         }
 
         private void CalculateTotals()
@@ -585,53 +587,53 @@
                 {
                     Console.WriteLine("Failed to add transaction. Duplicate TransactionId.");
                 }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error adding transaction: {ex.Message}");
-    }
-}
-
-    private void OpenDebtModal()
-    {
-        newDebt = new Debt { DebtDate = DateTime.Now };
-        showDebtModal = true;
-    }
-
-    private void CloseDebtModal()
-    {
-        showDebtModal = false;
-    }
-
-    private async Task AddDebt()
-    {
-        try
-        {
-            newDebt.DebtId = await DebtService.GetDebtsCountAsync();
-            var success = await DebtService.AddDebtAsync(newDebt);
-
-            if (success)
-            {
-                debts.Add(newDebt);
-                CalculateTotals();
-                CloseDebtModal();
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Failed to add debt. Duplicate DebtId.");
+                Console.WriteLine($"Error adding transaction: {ex.Message}");
             }
         }
 
-        catch (Exception ex)
+        private void OpenDebtModal()
         {
-            Console.WriteLine($"Error adding debt: {ex.Message}");
+            newDebt = new Debt { DebtDate = DateTime.Now };
+            showDebtModal = true;
         }
-    }
 
-    private void NavigateToDetailsPage(string type)
-    {
-        NavigationManager.NavigateTo($"/details/{type}");
-    }
+        private void CloseDebtModal()
+        {
+            showDebtModal = false;
+        }
+
+        private async Task AddDebt()
+        {
+            try
+            {
+                newDebt.DebtId = await DebtService.GetDebtsCountAsync();
+                var success = await DebtService.AddDebtAsync(newDebt);
+
+                if (success)
+                {
+                    debts.Add(newDebt);
+                    CalculateTotals();
+                    CloseDebtModal();
+                }
+                else
+                {
+                    Console.WriteLine("Failed to add debt. Duplicate DebtId.");
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding debt: {ex.Message}");
+            }
+        }
+
+        private void NavigateToDetailsPage(string type)
+        {
+            NavigationManager.NavigateTo($"/details/{type}");
+        }
 
         private async Task PayDebt(Debt debt)
         {
@@ -641,6 +643,31 @@
 
             debtPayingAmount = 0;
             await LoadDataAsync();
+        }
+
+        private void ApplyFilters()
+        {
+
+
+            var filteredIncomes = incomes;
+            var filteredExpenses = expenses;
+            var filteredDebts = debts;
+            if (StartDate.HasValue && EndDate.HasValue)
+            {
+                filteredIncomes = FilterService.FilterByDate(filteredIncomes, StartDate.Value, EndDate.Value);
+                filteredExpenses = FilterService.FilterByDate(filteredExpenses, StartDate.Value, EndDate.Value);
+                filteredDebts = DebtFilterService.FilterByDate(filteredDebts, StartDate.Value, EndDate.Value);
+            }
+            FilteredIncomes = filteredIncomes;
+            FilteredExpenses = filteredExpenses;
+            FilteredDebts = filteredDebts;
+        }
+
+        private async Task ClearFilters()
+        {
+            await LoadDataAsync();
+            StartDate = null;
+            EndDate = null;
         }
 }
 
