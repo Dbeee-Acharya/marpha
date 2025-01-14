@@ -406,8 +406,12 @@
                     </div>
                     <div class="mb-3">
                         <label>Date</label>
-                        <input type="date" class="form-control" @bind="newDebt.DebtDueDate" />
+                        <input type="date" class="form-control" @bind="newDebt.DebtDate" />
                     </div>
+                        <div class="mb-3">
+                            <label>Due Date</label>
+                            <input type="date" class="form-control" @bind="newDebt.DebtDueDate" />
+                        </div>
                     <div class="mb-3">
                         <label>Category</label>
                         <select class="form-control" @bind="newTransaction.TransactionCategory">
@@ -518,25 +522,26 @@
             expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
             debts = await DebtService.GetAllDebtsAsync();
 
-            numberOfIncome = incomes.Count();
-            numberOfDebts = debts.Count();
-            numberOfExpense = expenses.Count();
-
-            categories = await CategoryService.GetAllCategoriesAsync();
-            CalculateTotals();
-
             FilteredIncomes = incomes;
             FilteredExpenses = expenses;
             FilteredDebts = debts;
+
+            numberOfIncome = FilteredIncomes.Count();
+            numberOfDebts = FilteredDebts.Count();
+            numberOfExpense = FilteredExpenses.Count();
+
+            categories = await CategoryService.GetAllCategoriesAsync();
+
+            CalculateTotals();
 
             await FindTopTransactions();
         }
 
         private void CalculateTotals()
         {
-            totalIncome = (decimal)transactions.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
-            totalExpense = (decimal)transactions.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
-            totalDebt = (decimal)debts.Sum(d => d.DebtAmount);
+            totalIncome = (decimal)FilteredIncomes.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
+            totalExpense = (decimal)FilteredExpenses.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
+            totalDebt = (decimal)FilteredDebts.Sum(d => d.DebtAmount);
 
             totalTransaction = totalIncome + totalDebt - totalExpense;
 
@@ -658,6 +663,9 @@
             FilteredIncomes = filteredIncomes;
             FilteredExpenses = filteredExpenses;
             FilteredDebts = filteredDebts;
+
+            FindTopTransactions();
+            CalculateTotals();
         }
 
         private async Task ClearFilters()
