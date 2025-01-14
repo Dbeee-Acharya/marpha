@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using marpha.Services
 @using marpha.Data
-@using marpha.Components.Modals
+@using marpha.Components
 @inject ITransactionService TransactionService
 @inject IDebtService DebtService
 @inject ICategoryService CategoryService
@@ -53,7 +53,8 @@
                     <h2>@totalIncome</h2>
                 </div>
 
-                <div class="align-self-end">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="fw-bolder">Total Transactions: @numberOfIncome</div>
                     <button class="btn btn-outline-success" @onclick='() => NavigateToDetailsPage("IncomeDetails")'>See All ></button>
                 </div>
             </div>
@@ -69,7 +70,8 @@
                 <h2>@totalExpense</h2>
                 </div>
 
-                <div class="align-self-end">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="fw-bolder">Total Transactions: @numberOfExpense</div>
                     <button class="btn btn-outline-danger" @onclick='() => NavigateToDetailsPage("ExpenseDetails")'>See All ></button>
                 </div>
             </div>
@@ -81,7 +83,6 @@
 
                     <div class="d-flex gap-3">
                         <button class="btn btn-dark btn-sm" @onclick="OpenDebtModal">Add Debt +</button>
-                        <button class="btn btn-dark btn-sm">Pay Debt -</button>
                     </div>
                 </div>
 
@@ -89,7 +90,8 @@
                     <h2>@totalDebt</h2>
                 </div>
 
-                <div class="align-self-end">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <div class="fw-bolder">Total Transactions: @numberOfDebts</div>
                     <button class="btn btn-outline-warning" @onclick='() => NavigateToDetailsPage("DebtDetails")'>See All ></button>
                 </div>
             </div>
@@ -165,11 +167,6 @@
     </div>
     </div>
     
-    <div class="row">
-        <div class="col-md-4">
-            Chart
-        </div>
-    </div>
     <div>
         <h4>Top Transactions</h4>
         <div class="container mt-5">
@@ -180,10 +177,14 @@
                 <div class="card-header bg-success text-white">
                     Top Income
                 </div>
+                
                 <div class="card-body">
-                    <h4 class="card-title">@topIncome.TransactionName</h4>
-                    <h5 class="card-title">@topIncome.TransactionAmount</h5>
-                    <p class="card-text">Highest income recorded in the period.</p>
+                    @if (topIncome != null)
+                    {
+                        <h4 class="card-title">@topIncome.TransactionName</h4>
+                        <h5 class="card-title">@topIncome.TransactionAmount</h5>
+                        <p class="card-text">Highest income recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -195,9 +196,12 @@
                     Top Expense
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">@topExpense.TransactionName</h4>
-                    <h5 class="card-title">@topExpense.TransactionAmount</h5>
-                    <p class="card-text">Highest expense recorded in the period.</p>
+                    @if (topExpense != null) 
+                    {
+                        <h4 class="card-title">@topExpense.TransactionName</h4>
+                        <h5 class="card-title">@topExpense.TransactionAmount</h5>
+                        <p class="card-text">Highest expense recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -209,9 +213,12 @@
                     Top Debt
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">@topDebt.DebtName</h4>
-                    <h5 class="card-title">@topDebt.DebtAmount</h5>
-                    <p class="card-text">Highest debt recorded in the period.</p>
+                    @if (topDebt != null) 
+                    {
+                        <h4 class="card-title">@topDebt.DebtName</h4>
+                        <h5 class="card-title">@topDebt.DebtAmount</h5>
+                        <p class="card-text">Highest debt recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -223,9 +230,12 @@
                     Lowest Income
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">@bottomIncome.TransactionName</h4>
-                    <h5 class="card-title">@bottomIncome.TransactionAmount</h5>
-                    <p class="card-text">Lowest income recorded in the period.</p>
+                    @if (bottomIncome != null) 
+                    {
+                        <h4 class="card-title">@bottomIncome.TransactionName</h4>
+                        <h5 class="card-title">@bottomIncome.TransactionAmount</h5>
+                        <p class="card-text">Lowest income recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -237,9 +247,12 @@
                     Lowest Expense
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">@bottomExpense.TransactionName</h4>
-                    <h5 class="card-title">@bottomExpense.TransactionAmount</h5>
-                    <p class="card-text">Lowest expense recorded in the period.</p>
+                    @if (bottomExpense != null) 
+                    {
+                        <h4 class="card-title">@bottomExpense.TransactionName</h4>
+                        <h5 class="card-title">@bottomExpense.TransactionAmount</h5>
+                        <p class="card-text">Lowest expense recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -251,36 +264,46 @@
                     Lowest Debt
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">@bottomDebt.DebtName</h4>
-                    <h5 class="card-title">@bottomDebt.DebtAmount</h5>
-                    <p class="card-text">Lowest debt recorded in the period.</p>
+                    @if (bottomDebt != null && bottomDebt.DebtAmount != 0l) 
+                    {
+                        <h4 class="card-title">@bottomDebt.DebtName</h4>
+                        <h5 class="card-title">@bottomDebt.DebtAmount</h5>
+                        <p class="card-text">Lowest debt recorded in the period.</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
     </div>
-
     <div style="margin-top: 20px;">
-        <h4>Debts</h4>
-        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <h4>Pending Debts</h4>
+        <table class="table table-bordered table-warning">
             <thead>
                 <tr>
                     <th>Debt Name</th>
                     <th>Amount</th>
                     <th>Description</th>
                     <th>Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var debt in debts)
                 {
-                    <tr>
-                        <td>@debt.DebtName</td>
-                        <td>@debt.DebtAmount</td>
-                        <td>@debt.DebtDescription</td>
-                        <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
-                    </tr>
+                    if(debt.DebtAmount != 0)
+                    {
+                        <tr>
+                            <td>@debt.DebtName</td>
+                            <td>@debt.DebtAmount</td>
+                            <td>@debt.DebtDescription</td>
+                            <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
+                            <td class="d-flex gap-3">
+                                <input placeholder="Debt Amount to pay..." @bind="debtPayingAmount" />
+                                <button class="btn btn-secondary btn-sm" @onclick="() => PayDebt(debt)">Pay</button>
+                            </td>
+                        </tr>                 
+                    }    
                 }
             </tbody>
         </table>
@@ -398,6 +421,9 @@
 
     @code {
         private List<Transaction> transactions = new List<Transaction>();
+        private int numberOfIncome;
+        private int numberOfExpense;
+        private int numberOfDebts;
         private List<Debt> debts = new List<Debt>();
         private Transaction newTransaction = new Transaction();
         private Debt newDebt = new Debt();
@@ -416,18 +442,20 @@
         private List<Transaction> incomes  = new List<Transaction>();
         private List<Transaction> expenses = new List<Transaction>();
 
-        private Transaction? topIncome;
-        private Transaction? topExpense;
-        private Debt? topDebt;
+        private Transaction topIncome;
+        private Transaction topExpense;
+        private Debt topDebt;
 
-        private Transaction? bottomIncome;
-        private Transaction? bottomExpense;
-        private Debt? bottomDebt;
+        private Transaction bottomIncome;
+        private Transaction bottomExpense;
+        private Debt bottomDebt;
 
         private DateTime? FromDate { get; set; }
         private DateTime? ToDate { get; set; }
 
         private string error;
+
+        private decimal debtPayingAmount;
 
         protected override async Task OnInitializedAsync()
         {
@@ -475,6 +503,10 @@
             incomes = await TransactionService.GetTransactionByTypeAsync("Income");
             expenses = await TransactionService.GetTransactionByTypeAsync("Expense");
             debts = await DebtService.GetAllDebtsAsync();
+
+            numberOfIncome = incomes.Count();
+            numberOfDebts = debts.Count();
+            numberOfExpense = expenses.Count();
 
             categories = await CategoryService.GetAllCategoriesAsync();
             CalculateTotals();
@@ -596,6 +628,16 @@
     {
         NavigationManager.NavigateTo($"/details/{type}");
     }
+
+        private async Task PayDebt(Debt debt)
+        {
+            var totalIncome = await TransactionService.GetTotalTransactionByTypeAsync("Income");
+
+            await DebtService.PayDebtAsync(debt, totalIncome, debtPayingAmount);
+
+            debtPayingAmount = 0;
+            await LoadDataAsync();
+        }
 }
 
 </div>

@@ -21,6 +21,11 @@ namespace marpha.Services
                     return false;
                 }
 
+                if(string.IsNullOrEmpty(transaction.TransactionCategory))
+                {
+                    transaction.TransactionCategory = "None";
+                }
+
                 transactions.Add(transaction);
                 await SaveTransactionsAsync(transactions);
                 return true;

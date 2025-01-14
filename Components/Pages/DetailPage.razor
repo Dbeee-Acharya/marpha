@@ -4,8 +4,59 @@
 @inject NavigationManager NavigationManager
 @inject IDebtService DebtService
 @inject ITransactionService TransactionService
+@inject IFilterService FilterService
 
 <h3>@pageTitle</h3>
+
+
+<div class="container">
+    <h3>Filter and Sort Transactions</h3>
+
+    <div class="row mb-3">
+        <!-- Date Range Filter -->
+        <div class="col-md-3">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" class="form-control" @bind="StartDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+        </div>
+
+        <!-- Name Filter -->
+        <div class="col-md-3">
+            <label for="nameFilter">Name</label>
+            <input type="text" id="nameFilter" class="form-control" placeholder="Search by name" @bind="NameFilter" />
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-md-3">
+            <label for="categoryFilter">Category</label>
+            <input type="text" id="categoryFilter" class="form-control" placeholder="Search by category" @bind="CategoryFilter" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <!-- Sort Options -->
+        <div class="col-md-3">
+            <label for="sortDate">Sort by Date</label>
+            <select id="sortDate" class="form-control" @bind="SortByDateAscending">
+                <option value="true">Ascending</option>
+                <option value="false">Descending</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="sortAmount">Sort by Amount</label>
+            <select id="sortAmount" class="form-control" @bind="SortByAmountAscending">
+                <option value="true">Ascending</option>
+                <option value="false">Descending</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn btn-primary mb-3" @onclick="ApplyFilters">Apply Filters</button>
+    <button class="btn btn-secondary mb-3" @onclick="ClearFilters">Clear Filters</button>
+</div>
 
 <div>
     @if (isLoading)
@@ -30,10 +81,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (details != null)
+                    @if (FilteredTransactions != null)
                     {
                         int index = 1;
-                        foreach (var transaction in details)
+                        foreach (var transaction in FilteredTransactions)
                         {
                             <tr>
                                 <td>@index</td>
@@ -75,10 +126,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (details != null)
+                    @if (FilteredTransactions != null)
                     {
                         int index = 1;
-                        foreach (var transaction in details)
+                        foreach (var transaction in FilteredTransactions)
                         {
                             <tr>
                                 <td>@index</td>
@@ -167,6 +218,15 @@
 @code {
     [Parameter] public string type { get; set; }
 
+    private List<Transaction> FilteredTransactions = new();
+    private List<Debt> FilteredDebts = new();
+    private DateTime? StartDate { get; set; }
+    private DateTime? EndDate { get; set; }
+    private string NameFilter = string.Empty;
+    private string CategoryFilter = string.Empty;
+    private String SortByDateAscending = "true";
+    private String SortByAmountAscending = "true";
+
     private string pageTitle;
     private bool isLoading = true;
     private List<Transaction> details = new List<Transaction>();
@@ -186,20 +246,19 @@
         {
             pageTitle = "Income Details";
             details = await TransactionService.GetTransactionByTypeAsync("Income");
+            FilteredTransactions = details;
         }
         else if (type == "DebtDetails")
         {
             pageTitle = "Debt Details";
             debtDetails = await DebtService.GetAllDebtsAsync();
+            FilteredDebts = debtDetails;
         }
         else if (type == "ExpenseDetails")
         {
             pageTitle = "Expense Details";
             details = await TransactionService.GetTransactionByTypeAsync("Expense");
-        }
-        else
-        {
-            details = null;
+            FilteredTransactions = details;
         }
 
         isLoading = false;
@@ -209,7 +268,6 @@
     {
         bool deleted = await TransactionService.DeleteTransactionAsync(transaction.TransactionId);
         await LoadDetailsAsync();
-
     }
 
     private async Task DeleteDebt(Debt debt)
@@ -226,5 +284,52 @@
 
         debtPayingAmount = 0;
         await LoadDetailsAsync();
+    }
+
+    private void ApplyFilters()
+    {
+
+        if(type != "DebtDetails")
+        {
+            var filtered = details;
+            if (StartDate.HasValue && EndDate.HasValue)
+            {
+                filtered = FilterService.FilterByDate(filtered, StartDate.Value, EndDate.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(NameFilter))
+            {
+                filtered = FilterService.FilterByName(filtered, NameFilter);
+            }
+
+            if (!string.IsNullOrWhiteSpace(CategoryFilter))
+            {
+                filtered = FilterService.FilterByCategory(filtered, CategoryFilter);
+            }
+
+            if(SortByAmountAscending != "true")
+            {
+                filtered = FilterService.SortByAmount(filtered, false);
+            }
+
+            if(SortByDateAscending != "true")
+            {
+                filtered = FilterService.SortByDate(filtered, false);
+            }
+            FilteredTransactions = filtered;
+        }          
+    }
+
+    private async Task ClearFilters()
+    {
+        await LoadDetailsAsync();
+
+        StartDate =null;
+        EndDate =null;
+        NameFilter = string.Empty;
+        CategoryFilter = string.Empty;
+        SortByDateAscending = "true";
+        SortByAmountAscending = "true";
+       
     }
 }
