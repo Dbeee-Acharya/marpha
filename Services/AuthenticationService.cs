@@ -13,6 +13,7 @@ namespace marpha.Services
     {
         private readonly string users_file_path = Path.Combine(AppContext.BaseDirectory, "UserDetails.json");
         public bool IsAuthenticated { get; set; } = false;
+        public string SelectedCurrency { get; set; } = "Npr.";
 
         public async Task<bool> RegisterUserAsync(User user)
         {

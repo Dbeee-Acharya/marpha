@@ -25,7 +25,17 @@
                     <label for="password" class="form-label">Password</label>
                     <input type="password" id="password" class="form-control" @bind="loginUser.UserPassword" placeholder="Enter your password" />
                 </div>
-                <div class="d-grid">
+                <div>
+                    <label for="currency">Currency</label>
+                    <select id="currency" class="form-select" @bind="SelectedCurrency">
+                        <option value=""></option>
+                        <option value="NPR">NPR</option>
+                        <option value="USD">$ (USD)</option>
+                        <option value="EUR">€ (Euro)</option>
+                    </select>
+                </div>
+                <hr />
+                <div class="d-grid mt-3">
                     <button type="button" class="btn btn-primary" @onclick="LoginUser">Login</button>
                 </div>
                 <div class="text-center mt-3">
@@ -44,6 +54,7 @@
 @code {
     private User loginUser = new User();
     private string Message;
+    private string SelectedCurrency;
 
     private async Task LoginUser()
     {
@@ -54,6 +65,7 @@
             if (loggedIn)
             {
                 Message = "Login successful!";
+                authService.SelectedCurrency = SelectedCurrency;
                 navigationManager.NavigateTo("/");
             }
             else

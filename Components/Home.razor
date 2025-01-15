@@ -76,7 +76,7 @@
                 </div>
 
                 <div>
-                    <h2>@totalIncome</h2>
+                    <h2>@SelectedCurrency @totalIncome</h2>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
@@ -93,7 +93,7 @@
                 </div>
                 
                 <div>
-                <h2>@totalExpense</h2>
+                <h2>@SelectedCurrency @totalExpense</h2>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
@@ -113,7 +113,7 @@
                 </div>
 
                 <div>
-                    <h2>@totalDebt</h2>
+                    <h2>@SelectedCurrency @totalDebt</h2>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between w-100">
@@ -139,7 +139,7 @@
             {
                 <tr>
                     <td>@income.TransactionName</td>
-                    <td>@income.TransactionAmount</td>
+                    <td>@SelectedCurrency @income.TransactionAmount</td>
                     <td>@income.TransactionDate.ToString("yyyy-MM-dd")</td>
                 </tr>
             }
@@ -162,7 +162,7 @@
             {
                 <tr>
                     <td>@expense.TransactionName</td>
-                    <td>@expense.TransactionAmount</td>
+                            <td>@SelectedCurrency @expense.TransactionAmount</td>
                     <td>@expense.TransactionDate.ToString("yyyy-MM-dd")</td>
                 </tr>
             }
@@ -184,7 +184,7 @@
             {
                 <tr>
                     <td>@debt.DebtName</td>
-                    <td>@debt.DebtAmount</td>
+                            <td>@SelectedCurrency @debt.DebtAmount</td>
                     <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
                 </tr>
             }
@@ -212,7 +212,7 @@
                     @if (topIncome != null)
                     {
                         <h4 class="card-title">@topIncome.TransactionName</h4>
-                        <h5 class="card-title">@topIncome.TransactionAmount</h5>
+                                <h5 class="card-title">@SelectedCurrency @topIncome.TransactionAmount</h5>
                         <p class="card-text">Highest income recorded in the period.</p>
                     }
                 </div>
@@ -229,7 +229,7 @@
                     @if (topExpense != null) 
                     {
                         <h4 class="card-title">@topExpense.TransactionName</h4>
-                        <h5 class="card-title">@topExpense.TransactionAmount</h5>
+                        <h5 class="card-title">@SelectedCurrency @topExpense.TransactionAmount</h5>
                         <p class="card-text">Highest expense recorded in the period.</p>
                     }
                 </div>
@@ -246,7 +246,7 @@
                     @if (topDebt != null) 
                     {
                         <h4 class="card-title">@topDebt.DebtName</h4>
-                        <h5 class="card-title">@topDebt.DebtAmount</h5>
+                                <h5 class="card-title">@SelectedCurrency @topDebt.DebtAmount</h5>
                         <p class="card-text">Highest debt recorded in the period.</p>
                     }
                 </div>
@@ -263,7 +263,7 @@
                     @if (bottomIncome != null) 
                     {
                         <h4 class="card-title">@bottomIncome.TransactionName</h4>
-                        <h5 class="card-title">@bottomIncome.TransactionAmount</h5>
+                                <h5 class="card-title">@SelectedCurrency @bottomIncome.TransactionAmount</h5>
                         <p class="card-text">Lowest income recorded in the period.</p>
                     }
                 </div>
@@ -280,7 +280,7 @@
                     @if (bottomExpense != null) 
                     {
                         <h4 class="card-title">@bottomExpense.TransactionName</h4>
-                        <h5 class="card-title">@bottomExpense.TransactionAmount</h5>
+                        <h5 class="card-title">@SelectedCurrency @bottomExpense.TransactionAmount</h5>
                         <p class="card-text">Lowest expense recorded in the period.</p>
                     }
                 </div>
@@ -297,7 +297,7 @@
                     @if (bottomDebt != null && bottomDebt.DebtAmount != 0l) 
                     {
                         <h4 class="card-title">@bottomDebt.DebtName</h4>
-                        <h5 class="card-title">@bottomDebt.DebtAmount</h5>
+                        <h5 class="card-title">@SelectedCurrency @bottomDebt.DebtAmount</h5>
                         <p class="card-text">Lowest debt recorded in the period.</p>
                     }
                 </div>
@@ -325,7 +325,7 @@
                     {
                         <tr>
                             <td>@debt.DebtName</td>
-                            <td>@debt.DebtAmount</td>
+                            <td>@SelectedCurrency @debt.DebtAmount</td>
                             <td>@debt.DebtDescription</td>
                             <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
                             <td class="d-flex gap-3">
@@ -472,6 +472,8 @@
         private bool showTransactionModal;
         private bool showDebtModal;
 
+        private String SelectedCurrency;
+
         private List<Category> categories;
 
         private List<Transaction> incomes  = new List<Transaction>();
@@ -550,6 +552,8 @@
             numberOfExpense = FilteredExpenses.Count();
 
             categories = await CategoryService.GetAllCategoriesAsync();
+
+            SelectedCurrency = AuthService.SelectedCurrency;
 
             CalculateTotals();
 

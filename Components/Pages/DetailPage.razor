@@ -6,10 +6,10 @@
 @inject ITransactionService TransactionService
 @inject IFilterService FilterService
 @inject IDebtFilterService DebtFilterService
+@inject IAuthenticationService AuthService
 
 <h3>@pageTitle</h3>
 <hr />
-
 
 <div class="container">
     <h3>Filter and Sort Transactions</h3>
@@ -99,7 +99,7 @@
                                 <td>@index</td>
                                 <td>@transaction.TransactionName</td>
                                 <td>@transaction.TransactionType</td>
-                                <td>@transaction.TransactionAmount</td>
+                                <td>@SelectedCurrency @transaction.TransactionAmount</td>
                                 <td>@transaction.TransactionDate.ToShortDateString()</td>
                                 <td>@transaction.TransactionCategory</td>
                                 <td>@transaction.TransactionDescription</td>
@@ -144,7 +144,7 @@
                                 <td>@index</td>
                                 <td>@transaction.TransactionName</td>
                                 <td>@transaction.TransactionType</td>
-                                <td>@transaction.TransactionAmount</td>
+                                <td>@SelectedCurrency @transaction.TransactionAmount</td>
                                 <td>@transaction.TransactionDate.ToShortDateString()</td>
                                 <td>@transaction.TransactionCategory</td>
                                 <td>@transaction.TransactionDescription</td>
@@ -190,7 +190,7 @@
                                 <td>@debt.DebtName</td>
                                 <td>@debt.DebtDescription</td>
                                 <td>@debt.PaidAmount</td>
-                                <td>@debt.DebtAmount</td>
+                                <td>@SelectedCurrency @debt.DebtAmount</td>
                                 <td>@debt.DebtDate.ToShortDateString()</td>
                                 <td>@debt.DebtDueDate.ToShortDateString()</td>
                                 <td>
@@ -244,9 +244,12 @@
 
     private decimal debtPayingAmount;
 
+    private String SelectedCurrency;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDetailsAsync();
+        SelectedCurrency = AuthService.SelectedCurrency;
     }
 
     private async Task LoadDetailsAsync()
