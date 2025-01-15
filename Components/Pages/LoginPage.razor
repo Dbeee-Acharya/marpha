@@ -4,20 +4,35 @@
 @inject IAuthenticationService authService
 @inject NavigationManager navigationManager
 
+@if (authService.IsAuthenticated)
+{
+    navigationManager.NavigateTo("/");
+}
+
 <h3>Login</h3>
 
-<div>
-    <form>
-        <div>
-            <label>Email:</label>
-            <input type="email" @bind="loginUser.UserEmail" />
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg" style="width: 25rem;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Login</h3>
+            <form>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" class="form-control" @bind="loginUser.UserEmail" placeholder="Enter your email" />
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-control" @bind="loginUser.UserPassword" placeholder="Enter your password" />
+                </div>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-primary" @onclick="LoginUser">Login</button>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-muted">Don't have an account? <a href="/register">Register here</a></small>
+                </div>
+            </form>
         </div>
-        <div>
-            <label>Password:</label>
-            <input type="password" @bind="loginUser.UserPassword" />
-        </div>
-        <button type="button" @onclick="LoginUser">Login</button>
-    </form>
+    </div>
 </div>
 
 @if (!string.IsNullOrEmpty(Message))
@@ -33,14 +48,9 @@
     {
         try
         {
-            var users = await authService.GetAllUsersAsync();
+            var loggedIn = await authService.LoginUserAsync(loginUser.UserEmail, loginUser.UserPassword);
 
-            // Check if the email and password match an existing user
-            var authenticatedUser = users.FirstOrDefault(u =>
-                u.UserEmail == loginUser.UserEmail &&
-                u.UserPassword == loginUser.UserPassword);
-
-            if (authenticatedUser != null)
+            if (loggedIn)
             {
                 Message = "Login successful!";
                 navigationManager.NavigateTo("/");

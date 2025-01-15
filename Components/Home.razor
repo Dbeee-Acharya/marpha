@@ -9,6 +9,12 @@
 @inject NavigationManager NavigationManager
 @inject IFilterService FilterService
 @inject IDebtFilterService DebtFilterService
+@inject IAuthenticationService AuthService
+
+@if (!AuthService.IsAuthenticated)
+{
+    NavigationManager.NavigateTo("/login");
+}
 
 <style>
     .dashboard-card {
@@ -198,7 +204,7 @@
         @* Top Income Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-success text-white">
+                        <div class="card-header text-white" style="background-color: #28a745">
                     Top Income
                 </div>
                 
@@ -216,7 +222,7 @@
         @* Top Expense Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
+                        <div class="card-header text-white" style="background-color: #dc3545">
                     Top Expense
                 </div>
                 <div class="card-body">
@@ -233,7 +239,7 @@
         @* Top Debt Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                        <div class="card-header text-white" style="background-color: #ffc107">
                     Top Debt
                 </div>
                 <div class="card-body">
@@ -250,7 +256,7 @@
         @* Lowest Income Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-danger text-white">
+                 <div class="card-header text-black" style="background-color: #71c48c">
                     Lowest Income
                 </div>
                 <div class="card-body">
@@ -267,7 +273,7 @@
         @* Lowest Expense Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-info text-white">
+                        <div class="card-header text-black" style="background-color: #f5a5a9">
                     Lowest Expense
                 </div>
                 <div class="card-body">
@@ -284,7 +290,7 @@
         @* Lowest Debt Card *@
         <div class="col-md-4 mb-4">
             <div class="card">
-                <div class="card-header bg-secondary text-white">
+                        <div class="card-header text-black" style="background-color: #ffe8a1">
                     Lowest Debt
                 </div>
                 <div class="card-body">

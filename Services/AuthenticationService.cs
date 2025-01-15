@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace marpha.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly string users_file_path = Path.Combine(AppContext.BaseDirectory, "UserDetails.json");
+        public bool IsAuthenticated { get; set; } = false;
 
         public async Task<bool> RegisterUserAsync(User user)
         {
@@ -33,17 +35,25 @@ namespace marpha.Services
             }
         }
 
-        public async Task<User?> LoginUserAsync(string userEmail, string password)
+        public async Task<bool> LoginUserAsync(string userEmail, string password)
         {
             try
             {
                 var users = await GetAllUsersAsync();
-                return users.FirstOrDefault(u => u.UserEmail == userEmail && u.UserPassword == password);
+                var user = users.FirstOrDefault(u => u.UserEmail == userEmail && u.UserPassword == password);
+
+                if(user != null)
+                {
+                    IsAuthenticated = true;
+                    return true;
+                }
+
+                return false;
             }
             catch(Exception ex)
             {
                 Console.WriteLine($"LOGIN ERROR: {ex.Message}");
-                return null;
+                return false;
             }
         }
 
@@ -69,6 +79,12 @@ namespace marpha.Services
         {
             var users = await GetAllUsersAsync();
             return users.Any() ? users.Max(u => u.UserId) + 1 : 1;
+        }
+
+        public bool Logout()
+        {
+            IsAuthenticated = false;
+            return true;
         }
     }
 }

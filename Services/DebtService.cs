@@ -12,6 +12,8 @@ namespace marpha.Services
     internal class DebtService : IDebtService
     {
         private readonly string debts_file_path = Path.Combine(AppContext.BaseDirectory, "DebtDetails.json");
+
+        public event Action DebtsUpdated;
         public async Task<bool> AddDebtAsync(Debt debt)
         {
             try
@@ -21,9 +23,15 @@ namespace marpha.Services
                 {
                     return false;
                 }
+
+                if(debt.DebtName == null || debt.DebtName.Trim() == "")
+                {
+                    return false;
+                }
                                 
                 debts.Add(debt);
                 await SaveDebtsAsync(debts);
+                DebtsUpdated?.Invoke();
                 return true;
             }
             catch (Exception ex)

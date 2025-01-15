@@ -9,6 +9,7 @@ namespace marpha.Services
 {
     public interface ITransactionService
     {
+        event Action TransactionsUpdated;
         Task<bool> AddTransactionAsync(Transaction transaction);
         Task SaveTransactionsAsync(List<Transaction> transactions);
         Task<List<Transaction>> GetAllTransactionsAsync();

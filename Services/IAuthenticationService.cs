@@ -9,10 +9,12 @@ namespace marpha.Services
 {
     public interface IAuthenticationService
     {
+        bool IsAuthenticated { get; set; }
         Task<bool> RegisterUserAsync(User user);
-        Task<User?> LoginUserAsync(string userEmail, string password);
+        Task<bool> LoginUserAsync(string userEmail, string password);
         Task<List<User>> GetAllUsersAsync();
         Task SaveUserAsync(List<User> users);
         Task<int> GetNextUserIdAsync();
+        bool Logout();
     }
 }

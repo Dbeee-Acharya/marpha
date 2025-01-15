@@ -11,6 +11,8 @@ namespace marpha.Services
     internal class TransactionService : ITransactionService
     {
         private readonly string transactions_file_path = Path.Combine(AppContext.BaseDirectory, "TransactionDetails.json");
+        public event Action TransactionsUpdated;
+
         public async Task<bool> AddTransactionAsync(Transaction transaction)
         {
             try
@@ -28,6 +30,7 @@ namespace marpha.Services
 
                 transactions.Add(transaction);
                 await SaveTransactionsAsync(transactions);
+                TransactionsUpdated?.Invoke();
                 return true;
             }
             catch (Exception ex)

@@ -9,6 +9,7 @@ namespace marpha.Services
 {
     public interface IDebtService
     {
+        event Action DebtsUpdated;
         Task<bool> AddDebtAsync(Debt debt);
         Task SaveDebtsAsync(List<Debt> debts);
         Task<List<Debt>> GetAllDebtsAsync();
