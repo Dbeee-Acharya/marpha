@@ -74,9 +74,9 @@
                     <h5>Income</h5>
                     <button class="btn btn-dark btn-sm btn-block" @onclick="OpenTransactionModal">Add Income +</button>
                 </div>
-
+                <hr />
                 <div>
-                    <h2>@SelectedCurrency @totalIncome</h2>
+                    <h4>@SelectedCurrency @totalIncome</h4>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
@@ -91,9 +91,9 @@
                     <h5>Expense</h5>
                     <button class="btn btn-dark btn-sm btn-block" @onclick="OpenTransactionModal">Add Expense +</button>
                 </div>
-                
+                <hr />
                 <div>
-                <h2>@SelectedCurrency @totalExpense</h2>
+                <h4>@SelectedCurrency @totalExpense</h4>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
@@ -111,9 +111,10 @@
                         <button class="btn btn-dark btn-sm" @onclick="OpenDebtModal">Add Debt +</button>
                     </div>
                 </div>
-
-                <div>
-                    <h2>@SelectedCurrency @totalDebt</h2>
+                <hr />
+                <div class="d-flex align-items-center gap-3">
+                    <h4>@SelectedCurrency @totalDebt</h4>
+                    <h5>(paid: @totalDebtPaid)</h5>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between w-100">
@@ -135,7 +136,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var income in FilteredIncomes.Take(5))
+                    @foreach (var income in FilteredIncomes.OrderByDescending(e => e.TransactionDate).Take(5))
             {
                 <tr>
                     <td>@income.TransactionName</td>
@@ -158,7 +159,7 @@
             </tr>
         </thead>
         <tbody>
-                    @foreach (var expense in FilteredExpenses.Take(5))
+                    @foreach (var expense in FilteredExpenses.OrderByDescending(e => e.TransactionDate).Take(5))
             {
                 <tr>
                     <td>@expense.TransactionName</td>
@@ -180,7 +181,7 @@
             </tr>
         </thead>
         <tbody>
-                    @foreach (var debt in FilteredDebts.Take(5))
+                    @foreach (var debt in FilteredDebts.OrderByDescending(e => e.DebtDate).Take(5))
             {
                 <tr>
                     <td>@debt.DebtName</td>
@@ -192,7 +193,7 @@
     </table>
     </div>
     </div>
-
+    <hr />
     <div class="d-flex justify-content-center align-items-center w-100">
         <PieChart Slice1="@Slice1" Slice2="@Slice2" Slice3="@Slice3" />
     </div>
@@ -366,6 +367,7 @@
                     <div class="mb-3">
                         <label>Amount</label>
                         <input type="number" class="form-control" @bind="newTransaction.TransactionAmount" />
+                        <span class="text-danger">@error</span>
                     </div>
                     <div class="mb-3">
                         <label>Date</label>
@@ -390,7 +392,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseTransactionModal">Close</button>
                     <button type="button" class="btn btn-primary" @onclick="AddTransaction">Save</button>
-
                     <div class="color-danger">@error</div>
                 </div>
             </div>
@@ -462,6 +463,7 @@
         private int numberOfIncome;
         private int numberOfExpense;
         private int numberOfDebts;
+        private decimal totalDebtPaid;
         private List<Debt> debts = new List<Debt>();
         private Transaction newTransaction = new Transaction();
         private Debt newDebt = new Debt();
@@ -565,8 +567,14 @@
             totalIncome = (decimal)FilteredIncomes.Where(t => t.TransactionType == "Income").Sum(t => t.TransactionAmount);
             totalExpense = (decimal)FilteredExpenses.Where(t => t.TransactionType == "Expense").Sum(t => t.TransactionAmount);
             totalDebt = (decimal)FilteredDebts.Sum(d => d.DebtAmount);
+            totalDebtPaid = (decimal)FilteredDebts.Sum(d => d.PaidAmount);
 
             totalTransaction = totalIncome + totalDebt - totalExpense;
+
+            if(totalTransaction == 0)
+            {
+                totalTransaction = 1;
+            }
 
             var incomePercentage = (totalIncome / totalTransaction) * 100;
             var expensePercentage = (totalExpense / totalTransaction) * 100;
